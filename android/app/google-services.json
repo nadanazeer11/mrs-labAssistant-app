@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "615747084639",
+    "project_id": "mrslab-1c119",
+    "storage_bucket": "mrslab-1c119.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615747084639:android:e0b7eb83d50731bb3a16ea",
+        "android_client_info": {
+          "package_name": "com.example.mrs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "615747084639-k2c81sbikgl7v3a45gqpiv7aggjkv39u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Y1XyQJ7v7sqFEDCQq_P7W3ZJXiDZkmA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "615747084639-k2c81sbikgl7v3a45gqpiv7aggjkv39u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
