@@ -2,7 +2,9 @@ import 'package:mrs/authentication/login_page.dart';
 import 'package:mrs/authentication/signup_page.dart';
 import 'package:mrs/authentication/newLogin.dart';
 import 'package:mrs/colors.dart';
+import 'package:mrs/dimensions.dart';
 import 'package:mrs/screens/create_project.dart';
+import 'package:mrs/screens/homeP.dart';
 import 'package:mrs/screens/project_descrip.dart';
 import 'package:mrs/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -34,9 +36,28 @@ class MyApp extends StatelessWidget {
       // ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('My App Title'),
+        brightness: Brightness.dark,
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+        toolbarHeight: 50,
+        leading:
+        CircleAvatar(
+          backgroundImage: AssetImage("assets/mrsrb.png"),
+          backgroundColor: Colors.white,
+          radius: 2,
+
         ),
-        body: ProjDescrip(),
+
+        title: Text("MRS"),
+
+    //centerTitle: true,
+    flexibleSpace: Container(
+    decoration: BoxDecoration(
+    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+    color: AppColorss.darkmainColor
+    ),
+    ),),
+        body:HomeP() ,
       ),
       
 

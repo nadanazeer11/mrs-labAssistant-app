@@ -29,28 +29,29 @@ class _MainHomeState extends State<MainHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       body:
-      Container(
-        child: Container(
-          margin: EdgeInsets.only(top:35,bottom: 15),
-          padding: EdgeInsets.only(left: 20,right: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              SmallText(text: "MRS",color: AppColorss.lightmainColor,size:29,),
-              Container(
-                width: 45,
-                height: 45,
-                child: Icon(Icons.search,
-                color: Colors.white,),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: AppColorss.lightmainColor
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
+      // Container(
+      //   child: Container(
+      //     margin: EdgeInsets.only(top:35,bottom: 15),
+      //     padding: EdgeInsets.only(left: 20,right: 15),
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //       children: <Widget>[
+      //         SmallText(text: "MRS",color: AppColorss.lightmainColor,size:29,),
+      //         Container(
+      //           width: 45,
+      //           height: 45,
+      //           child: Icon(Icons.search,
+      //           color: Colors.white,),
+      //           decoration: BoxDecoration(
+      //             borderRadius: BorderRadius.circular(15),
+      //             color: AppColorss.lightmainColor
+      //           ),
+      //         )
+      //       ],
+      //     ),
+      //   ),
+      // ),
+      Text("hey"),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: onItemTapped,
