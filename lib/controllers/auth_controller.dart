@@ -43,7 +43,6 @@ class AuthController extends GetxController {
   Future<bool> isUsernameUnique(String username) async {
     bool isUnique = true;
     try {
-
       final snapshot =
       await FirebaseFirestore.instance.collection(usersCollection).where('name', isEqualTo: username).get();
       if (snapshot.docs.isNotEmpty) {
@@ -54,6 +53,10 @@ class AuthController extends GetxController {
     }
     return isUnique;
   }
+  // Future<bool> signUpmethod(User user){
+  //
+  //   return true;
+  // }
 
   storeUserData({name, password, email}) async {
     // DocumentReference store = firestore.collection(usersCollection).doc(

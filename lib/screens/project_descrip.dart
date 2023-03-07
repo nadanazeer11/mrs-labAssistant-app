@@ -2,6 +2,7 @@ import 'package:mrs/controllers/project_controller.dart';
 import 'package:mrs/widgets/big_text.dart';
 import 'package:mrs/widgets/small_text.dart';
 import 'package:flutter/material.dart';
+import '../widgets/appbar.dart';
 import './../colors.dart';
 //import './fillHome.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
@@ -20,13 +21,32 @@ class ProjDescrip extends StatefulWidget {
 
 class _ProjDescripState extends State<ProjDescrip> {
   DateTime Start= DateTime.now();
-
   @override
   Widget build(BuildContext context) {
     double w=MediaQuery.of(context).size.width;
     double h=MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar( backgroundColor: Colors.transparent,
+            elevation: 0.0,
+            toolbarHeight: 50,
+            leading:
+            CircleAvatar(
+              backgroundImage: AssetImage("assets/mrsrb.png"),
+              backgroundColor: Colors.white,
+              radius: 2,
+
+            ),
+
+            title: Text("MRS",style: TextStyle(color: AppColorss.darkmainColor),),
+
+            //centerTitle: true,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
+                  color: AppColorss.lightGrey
+              ),
+            )),
         body:Stack(
           children: [
             SingleChildScrollView(

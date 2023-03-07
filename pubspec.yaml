@@ -13,6 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.5
   fluentui_icons: ^1.0.0
   cloud_firestore: ^4.4.3
   firebase_core: ^2.7.0

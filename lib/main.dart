@@ -3,6 +3,7 @@ import 'package:mrs/authentication/signup_page.dart';
 import 'package:mrs/authentication/newLogin.dart';
 import 'package:mrs/colors.dart';
 import 'package:mrs/dimensions.dart';
+import 'package:mrs/screens/HP.dart';
 import 'package:mrs/screens/create_project.dart';
 import 'package:mrs/screens/homeP.dart';
 import 'package:mrs/screens/project_descrip.dart';
@@ -29,11 +30,6 @@ class MyApp extends StatelessWidget {
     return  GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Firebase Firestore',
-      // theme:ThemeData(
-      //   scaffoldBackgroundColor: Colors.transparent,
-      //   appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent),
-      //   fontFamily: regular
-      // ),
       home: Scaffold(
         appBar: AppBar(
         brightness: Brightness.dark,
@@ -57,7 +53,7 @@ class MyApp extends StatelessWidget {
     color: AppColorss.darkmainColor
     ),
     ),),
-        body:HomeP() ,
+        body:HP(),
       ),
       
 

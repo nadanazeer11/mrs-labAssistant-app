@@ -2,6 +2,7 @@ import 'package:mrs/consts/consts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 class ProjectController extends GetxController{
+
   final CollectionReference projects =
   FirebaseFirestore.instance.collection('projects');
   Future<bool> createProject({title,description,enddate,startdate,users}) async {
@@ -18,15 +19,13 @@ class ProjectController extends GetxController{
         "users": users
       }).then((doc) => doc.id);
 
-      for (String user in users){
+       for (String user in users){
         final QuerySnapshot snapshot = await FirebaseFirestore.instance
             .collection('users')
             .where('name', isEqualTo: user)
             .get();
-
         final DocumentSnapshot userDoc = snapshot.docs.first;
         final String userId = userDoc.id;
-
         await FirebaseFirestore.instance.collection('users').doc(userId).update({
           'projects': FieldValue.arrayUnion([id])
         });
@@ -38,9 +37,6 @@ class ProjectController extends GetxController{
     }
     return isUnique;
   }
-
-
-
   Future<List<String>> getUserNames() async {
     final QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -59,8 +55,5 @@ class ProjectController extends GetxController{
     }
     return userNames;
   }
-
-
-
 
 }

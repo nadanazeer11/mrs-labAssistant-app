@@ -22,7 +22,7 @@ class _SignUpPageState extends State<SignUpPage> {
   var emailController=TextEditingController();
   var passwordController=TextEditingController();
   bool _allFieldsEntered = false;
-
+  final GlobalKey<FormState> _signUpForm = GlobalKey<FormState>();
   void _checkFieldsEntered() {
     if (nameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
@@ -51,19 +51,25 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    double w=MediaQuery.of(context).size.width;
-    double h=MediaQuery.of(context).size.height;
+    double w = MediaQuery
+        .of(context)
+        .size
+        .width;
+    double h = MediaQuery
+        .of(context)
+        .size
+        .height;
     return Scaffold(
         backgroundColor: Colors.white,
-        body:SingleChildScrollView(
+        body: SingleChildScrollView(
           child: Column(
             children: [
               Container(
-                width:w,
-                height:h*0.25,
+                width: w,
+                height: h * 0.25,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image:AssetImage("assets/mrsrb.png"),
+                    image: AssetImage("assets/mrsrb.png"),
 
 
                     // fit:BoxFit.fill
@@ -72,13 +78,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               Container(
-                width:w,
-                margin: const EdgeInsets.only(left: 20,right: 20),
+                width: w,
+                margin: const EdgeInsets.only(left: 20, right: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Big_text(text: "Join Us",size: 40,color: AppColorss.darkmainColor,),
-                    SmallText(text: "Create Your Account",color: Colors.grey,size: 22,),
+                    Big_text(text: "Join Us",
+                      size: 40,
+                      color: AppColorss.darkmainColor,),
+                    SmallText(text: "Create Your Account",
+                      color: Colors.grey,
+                      size: 22,),
                     SizedBox(height: 45,),
                     Container(
                       decoration: BoxDecoration(
@@ -87,17 +97,18 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(
                                 blurRadius: 10,
-                                offset: Offset(1,1),
+                                offset: Offset(1, 1),
                                 color: Colors.grey.withOpacity(0.2),
                                 spreadRadius: 7
                             )
                           ]
                       ),
                       child:
-                      TextField(
+                      TextFormField(
                         decoration: InputDecoration(
                             hintText: "Email",
-                            prefixIcon: Icon(Icons.email,color: AppColorss.darkmainColor,),
+                            prefixIcon: Icon(
+                              Icons.email, color: AppColorss.darkmainColor,),
                             focusedBorder: (OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
                                 borderSide: BorderSide(
@@ -116,6 +127,12 @@ class _SignUpPageState extends State<SignUpPage> {
                             )
                         ),
                         controller: emailController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Name is required.';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(height: 30,),
@@ -126,35 +143,43 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(
                                 blurRadius: 10,
-                                offset: Offset(1,1),
+                                offset: Offset(1, 1),
                                 color: Colors.grey.withOpacity(0.2),
                                 spreadRadius: 7
                             )
                           ]
                       ),
                       child:
-                      TextField(
-                        decoration: InputDecoration(
-                            hintText: "Username",
-                            prefixIcon: Icon(Icons.person,color: AppColorss.darkmainColor,),
-                            focusedBorder: (OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide(
-                                    color: Colors.white,
-                                    width: 1.0
-                                )
-                            )),
-                            enabledBorder: (OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.white,
-                                    width: 1.0
-                                )
-                            )),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30)
-                            )
-                        ),
-                          controller: nameController),
+                      TextFormField(
+                          decoration: InputDecoration(
+                              hintText: "Username",
+                              prefixIcon: Icon(
+                                Icons.person, color: AppColorss.darkmainColor,),
+                              focusedBorder: (OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0
+                                  )
+                              )),
+                              enabledBorder: (OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0
+                                  )
+                              )),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30)
+                              )
+                          ),
+                          controller: nameController,
+                          validator: (value) {
+                            //bool unique=Unique() as bool;
+                            if (value == null || value.isEmpty ) {
+                              return 'Unique Name is required.';
+                            }
+                            return null;
+                          }),
                     ),
                     SizedBox(height: 30,),
                     Container(
@@ -164,35 +189,44 @@ class _SignUpPageState extends State<SignUpPage> {
                           boxShadow: [
                             BoxShadow(
                                 blurRadius: 10,
-                                offset: Offset(1,1),
+                                offset: Offset(1, 1),
                                 color: Colors.grey.withOpacity(0.2),
                                 spreadRadius: 7
                             )
                           ]
                       ),
                       child:
-                      TextField(
-                        decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.password_outlined,color: AppColorss.darkmainColor,),
-                            hintText: "Password",
-                            focusedBorder: (OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide(
-                                    color: Colors.white,
-                                    width: 1.0
-                                )
-                            )),
-                            enabledBorder: (OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.white,
-                                    width: 1.0
-                                )
-                            )),
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30)
-                            )
-                        ),
-                          controller: passwordController
+                      TextFormField(
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.password_outlined,
+                                color: AppColorss.darkmainColor,),
+                              hintText: "Password",
+                              focusedBorder: (OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0
+                                  )
+                              )),
+                              enabledBorder: (OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0
+                                  )
+                              )),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30)
+                              )
+                          ),
+                          controller: passwordController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty ||
+                                value.length <= 7) {
+                              return 'Password should be at least 6 characters';
+                            }
+                            return null;
+                          }
+
                       ),
                     ),
                     SizedBox(height: 18,)
@@ -201,72 +235,41 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               SizedBox(height: 18),
               ElevatedButton(
-                  onPressed: _allFieldsEntered ? ()async {
-                    try{
-                      bool unique = await controller.isUsernameUnique(nameController.text);
-                      if(unique){
-                        await controller.signupMethod(context: context,
-                            email: emailController.text,
-                            password: passwordController.text).then((value){
-                          return controller.storeUserData(
-                              email: emailController.text,
-                              password: passwordController.text,
-                              name: nameController.text
-                          ).then((value){
-                            Get.offAll(()=>MainHome());
-                          });
-                        });
-                      }
-                      else{
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('This username already exists'),
-                          ),
-                        );
-                      }
-                    }
-                    catch(e){
-                      auth.signOut();
-                      VxToast.show(context, msg: "Error Occured ,Please try again");
-                    }
-                  } :
-                  (){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Fill out all fields'),
-                      ),
-                    );
-                  },
+                onPressed:SignUpp,
                 child: Text('Sign Up'),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor:_allFieldsEntered? Color(0xFF005466):Colors.grey,
+                    backgroundColor:
+                    //_allFieldsEntered
+                    //    ?
+                    Color(0xFF005466),
+                        // : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
                     minimumSize: Size(170, 40)
                 ),
               ),
-              SizedBox(height:10,),
+              SizedBox(height: 10,),
               Padding(
-                padding: const EdgeInsets.fromLTRB(68,0,0,0),
+                padding: const EdgeInsets.fromLTRB(68, 0, 0, 0),
                 child: Row(children: [
                   Text("Already Have An Account?",
-                      style:TextStyle(
-                          color:Colors.grey[500],
-                          fontSize:20
+                      style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 20
                       )),
-                  TextButton(onPressed: (){
+                  TextButton(onPressed: () {
                     Get.back();
-                  }, child: Text( "Log in",
+                  }, child: Text("Log in",
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold
                       )
                   )
-                  )]),
+                  )
+                ]),
               ),
-
 
 
             ],
@@ -275,7 +278,26 @@ class _SignUpPageState extends State<SignUpPage> {
         )
     );
   }
+  SignUpp() async {
+    if(_signUpForm.currentState!.validate()){
+      await controller.signupMethod(context: context,
+          email: emailController.text,
+          password: passwordController.text).then((value) {
+        return controller.storeUserData(
+            email: emailController.text,
+            password: passwordController.text,
+            name: nameController.text
+        ).then((value) {
+          Get.offAll(() => MainHome());
+        });
+      });
+
+    }
+  }
+  Future<bool> Unique()async{
+    bool unique = await controller.isUsernameUnique(
+        nameController.text);
+    return unique;
+
+  }
 }
-
-
-
