@@ -1,253 +1,126 @@
-import 'package:mrs/authentication/login_page.dart';
-import 'package:mrs/authentication/signup_page.dart';
-import 'package:mrs/authentication/newLogin.dart';
-import 'package:mrs/colors.dart';
-import 'package:mrs/dimensions.dart';
-import 'package:mrs/screens/HP.dart';
-import 'package:mrs/screens/create_project.dart';
-import 'package:mrs/screens/homeP.dart';
-import 'package:mrs/screens/project_descrip.dart';
-import 'package:mrs/screens/splash_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'consts/consts.dart';
+import 'package:flutter/material.dart';
+import 'package:mrs/authentication/screens/forget_password.dart';
+import 'package:mrs/authentication/screens/signup_screen.dart';
+import 'package:mrs/createProject/screens/create_project.dart';
+import 'package:mrs/home/screens/HP.dart';
+import 'package:mrs/projectDescription/Screens/project_description.dart';
+import 'package:mrs/user_state.dart';
 
-import 'authentication/newLogin.dart';
+import 'authentication/screens/login.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return  GetMaterialApp(
+    return MaterialApp(
+      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      title: 'Firebase Firestore',
-      home: Scaffold(
-        appBar: AppBar(
-        brightness: Brightness.dark,
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        toolbarHeight: 50,
-        leading:
-        CircleAvatar(
-          backgroundImage: AssetImage("assets/mrsrb.png"),
-          backgroundColor: Colors.white,
-          radius: 2,
-
-        ),
-
-        title: Text("MRS"),
-
-    //centerTitle: true,
-    flexibleSpace: Container(
-    decoration: BoxDecoration(
-    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),bottomRight: Radius.circular(10)),
-    color: AppColorss.darkmainColor
-    ),
-    ),),
-        body:HP(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-      
-
-
+    //  home:Login(),
+      routes:{
+        '/':(context)=>  Login(),
+        '/signUp':(context)=>const SignupScreen(),
+        '/forgetPassword':(context)=>ForgetPassword(),
+        '/home':(context)=>HP(),
+        '/addProject':(context)=>Create_Project(),
+        '/projectDetails':(context)=>ProjDescrip()
+      }
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-// text fields' controllers
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
 
-  final CollectionReference _products =
-  FirebaseFirestore.instance.collection('products');
-
-  Future<void> _create([DocumentSnapshot? documentSnapshot]) async {
-
-    await showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext ctx) {
-          return Padding(
-            padding: EdgeInsets.only(
-                top: 20,
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                TextField(
-                  keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-                  controller: _priceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  child: const Text('Create'),
-                  onPressed: () async {
-                    final String name = _nameController.text;
-                    final double? price =
-                    double.tryParse(_priceController.text);
-                    if (price != null) {
-                      await _products.add({"name": name, "price": price});
-
-                      _nameController.text = '';
-                      _priceController.text = '';
-                      Navigator.of(context).pop();
-                    }
-                  },
-                )
-              ],
-            ),
-          );
-
-        });
-  }
-  Future<void> _update([DocumentSnapshot? documentSnapshot]) async {
-    if (documentSnapshot != null) {
-
-      _nameController.text = documentSnapshot['name'];
-      _priceController.text = documentSnapshot['price'].toString();
-    }
-
-    await showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext ctx) {
-          return Padding(
-            padding: EdgeInsets.only(
-                top: 20,
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                TextField(
-                  keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-                  controller: _priceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  child: const Text( 'Update'),
-                  onPressed: () async {
-                    final String name = _nameController.text;
-                    final double? price =
-                    double.tryParse(_priceController.text);
-                    if (price != null) {
-
-                      await _products
-                          .doc(documentSnapshot!.id)
-                          .update({"name": name, "price": price});
-                      _nameController.text = '';
-                      _priceController.text = '';
-                      Navigator.of(context).pop();
-                    }
-                  },
-                )
-              ],
-            ),
-          );
-        });
-  }
-
-  Future<void> _delete(String productId) async {
-    await _products.doc(productId).delete();
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('You have successfully deleted a product')));
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
-        appBar: AppBar(
-          title: const Center(child: Text('Firebase Firestore')),
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+      ),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Invoke "debug painting" (press "p" in the console, choose the
+          // "Toggle Debug Paint" action from the Flutter Inspector in Android
+          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+          // to see the wireframe for each widget.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
         ),
-        body: StreamBuilder(
-          stream: _products.snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-            if (streamSnapshot.hasData) {
-              return ListView.builder(
-                itemCount: streamSnapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  final DocumentSnapshot documentSnapshot =
-                  streamSnapshot.data!.docs[index];
-                  return Card(
-                    margin: const EdgeInsets.all(10),
-                    child: ListTile(
-                      title: Text(documentSnapshot['name']),
-                      subtitle: Text(documentSnapshot['price'].toString()),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () =>
-                                    _update(documentSnapshot)),
-                            IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () =>
-                                    _delete(documentSnapshot.id)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }
-
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
-// Add new product
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _create(),
-          child: const Icon(Icons.add),
-
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

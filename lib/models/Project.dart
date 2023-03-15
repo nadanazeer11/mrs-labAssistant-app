@@ -1,40 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Project{
-  String id;
+class Project {
   String title;
   String description;
-  DateTime startdate;
-  DateTime enddate;
+  bool isDone;
+  bool isLate;
   List<String> users;
+  String createdBy;
+  Timestamp startDate;
+  Timestamp endDate;
+  List<String> notes;
 
-  Project({required this.id, required this.title,required this.description,required this.startdate,required this.enddate,required this.users});
-  factory Project.fromMap(Map<String, dynamic> data) {
-    final String id=data['id'];
-    final String title = data['title'];
-    final String description = data['description'];
-    final List<String> users = List<String>.from(data['users']);
-    final DateTime enddate = data['enddate'].toDate();
-    final DateTime startdate = data['startdate'].toDate();
 
-    return Project(
-      id:id,
-      title: title,
-      description: description,
-      users: users,
-      startdate: startdate,
-      enddate: enddate
+  Project(
+      {
+        required this.title,
+        required this.description,
+        required this.users,
+        required this.createdBy,
+        required this.startDate,
+        required this.endDate,
+        this.isDone=false,
+        this.isLate=false,
+        required this.notes
+      });
 
-    );
-  }
   Map<String, dynamic> toMap() {
     return {
       'title': title,
       'description': description,
+      'isDone': isDone,
+      'isLate': isLate,
       'users': users,
-      'enddate': Timestamp.fromDate(enddate),
-      'startdate':Timestamp.fromDate(enddate)
-
+      'createdBy': createdBy,
+      'startDate': startDate,
+      'endDate': endDate,
+      'notes':notes,
     };
   }
+  factory Project.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Project(
+      title: data['title'],
+      description: data['description'],
+      users: List<String>.from(data['users']),
+      createdBy: data['createdBy'],
+      startDate: data['startDate'],
+      endDate: data['endDate'],
+      isDone: data['isDone'] ?? false,
+      isLate: data['isLate'] ?? false,
+      notes:data['notes']
+    );
+  }
+
+
 }
