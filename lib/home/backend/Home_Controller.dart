@@ -43,6 +43,30 @@ class HomeContr{
      }
   }
 
+  Stream <List<Project>> getPD(){
+    debugPrint("home controllor getPD");
+    try {
+      return _db.collection('projects').get().asStream().map((querySnapshot) =>
+          querySnapshot.docs.map((doc) =>
+              Project(
+                title: doc['title'],
+                description: doc['description'],
+                users: List<String>.from(doc['users']),
+                createdBy: doc['createdBy'],
+                startDate: doc['startDate'],
+                endDate: doc['endDate'],
+                isDone: doc['isDone'],
+                isLate: doc['isLate'],
+                notes: List<String>.from(doc['notes']),
+                id:doc.id
+              ),
+          ).toList(),
+      );
+    } catch(e) {
+      debugPrint("error occurred while fetching all projects: $e");
+      throw Exception("");
+    }
+  }
   void get(String ?docId)async {
     await FirebaseFirestore.instance
         .collection('projects')

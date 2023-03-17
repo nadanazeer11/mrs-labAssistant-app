@@ -164,8 +164,8 @@ class _YourProjectsState extends State<YourProjects> {
                                   //Text('User name: ${project?.title}');
 
                                 }
+                                  return Container();
 
-                                return Text("r");
                               }
                           );
                         }),

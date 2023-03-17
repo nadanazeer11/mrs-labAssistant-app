@@ -10,6 +10,7 @@ class Project {
   Timestamp startDate;
   Timestamp endDate;
   List<String> notes;
+  String id;
 
 
   Project(
@@ -22,6 +23,7 @@ class Project {
         required this.endDate,
         this.isDone=false,
         this.isLate=false,
+        this.id="",
         required this.notes
       });
 
@@ -36,6 +38,7 @@ class Project {
       'startDate': startDate,
       'endDate': endDate,
       'notes':notes,
+      'id':id
     };
   }
   factory Project.fromFirestore(DocumentSnapshot doc) {
@@ -49,7 +52,8 @@ class Project {
       endDate: data['endDate'],
       isDone: data['isDone'] ?? false,
       isLate: data['isLate'] ?? false,
-      notes:data['notes']
+      notes:data['notes'],
+      id:data['id']
     );
   }
 

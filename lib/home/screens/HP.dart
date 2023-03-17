@@ -2,6 +2,7 @@
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mrs/config/colors.dart';
+import 'package:mrs/home/screens/OurProjects.dart';
 
 import '../../config/text_styles.dart';
 import '../widgets/project_item.dart';
@@ -16,7 +17,7 @@ class HP extends StatefulWidget {
 
 class _HPState extends State<HP> {
   static final List <Widget> widgetOptions=<Widget>[
-    YourProjects(),
+    OurProjects(),
   ];
   int indexx=0;
   void onItemTapped(int index){
@@ -38,7 +39,11 @@ class _HPState extends State<HP> {
           }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
-     body:widgetOptions[indexx],
+     body:Column(children:[ widgetOptions[indexx],
+       ElevatedButton(onPressed:(){
+         Navigator.pushNamed(context, '/addProject');
+       }, child: Text("add task"))
+     ]),
       bottomNavigationBar: BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       onTap: onItemTapped,

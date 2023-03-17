@@ -319,8 +319,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontSize: 20
                           )),
                       TextButton(onPressed: () {
-                        Navigator.canPop(context)?Navigator.pop(context):null;
-                        }, child: Text("Log in",
+                        Navigator.popAndPushNamed(context,'/');}, child: Text("Log in",
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,

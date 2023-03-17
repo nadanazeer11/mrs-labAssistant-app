@@ -21,12 +21,16 @@ class ProjectDContr{
       if (noteSnapshot.exists) {
         return Notes(
             user: noteSnapshot.get('user'),
-            note: noteSnapshot.get('note')
+            note: noteSnapshot.get('note'),
+            time: noteSnapshot.get('time'),
+            public: noteSnapshot.get('publiv')
         );
       } else {
         return Notes(
           user:"N/A",
-          note: "no note found!"
+          note: "no note found!",
+          time:Timestamp.fromDate(DateTime.now()),
+          public: false
         );
       }
     }
@@ -60,7 +64,7 @@ class ProjectDContr{
         return [];
       }
       else{
-        noteIds = List.from(noteIds.reversed); // reverse the array of noteIds
+        noteIds = List.from(noteIds.reversed);
         final List<Notes> notes = [];
 
         for (final n in noteIds) {
@@ -72,6 +76,8 @@ class ProjectDContr{
             notes.add(Notes(
               note: data['note'],
               user: data['user'],
+              time: data['time'],
+              public: data['public']
             ));
           }
         }
@@ -84,5 +90,31 @@ class ProjectDContr{
       throw Exception("f");
     }
 
+  }
+  Future<bool>see (String? pid,String ?uid)async{
+    try{
+      DocumentSnapshot x=await _db.collection('users').doc(uid).get();
+      if(x.exists){
+        String name=x.get("name");
+        List<String> proj=List<String>.from(x.get('projects'));
+        if(proj.contains(pid)){
+          debugPrint("allow ");
+          return true;
+        }
+        else{
+          debugPrint("no allow ");
+
+          return false;
+        }
+      }
+      else{
+        debugPrint("error allow ");
+
+        throw Exception("f");
+      }
+    }
+    catch(e){
+      throw Exception("f");
+    }
   }
 }
