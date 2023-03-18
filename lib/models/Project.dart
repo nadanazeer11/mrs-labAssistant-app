@@ -11,6 +11,7 @@ class Project {
   Timestamp endDate;
   List<String> notes;
   String id;
+  Timestamp creation;
 
 
   Project(
@@ -24,7 +25,8 @@ class Project {
         this.isDone=false,
         this.isLate=false,
         this.id="",
-        required this.notes
+        required this.notes,
+        required this.creation
       });
 
   Map<String, dynamic> toMap() {
@@ -38,7 +40,8 @@ class Project {
       'startDate': startDate,
       'endDate': endDate,
       'notes':notes,
-      'id':id
+      'id':id,
+      'creation':creation
     };
   }
   factory Project.fromFirestore(DocumentSnapshot doc) {
@@ -53,7 +56,8 @@ class Project {
       isDone: data['isDone'] ?? false,
       isLate: data['isLate'] ?? false,
       notes:data['notes'],
-      id:data['id']
+      id:data['id'],
+      creation:data['creation']
     );
   }
 

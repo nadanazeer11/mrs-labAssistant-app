@@ -34,6 +34,7 @@ class CreatePController{
   Future<void>createProject(Project project)async{
     DocumentReference id;
     try{
+      debugPrint("in create P cont");
      id=await  _db.collection("projects").add(project.toMap());
      for (String user in project.users){
        final QuerySnapshot snapshot = await _db.collection('users')

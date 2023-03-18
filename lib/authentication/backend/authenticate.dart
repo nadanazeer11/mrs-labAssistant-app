@@ -18,7 +18,9 @@ class Authenticate{
         "password":user.password,
         "name":user.name,
         "projects":user.projects,
-        "tasks":user.tasks
+        "tasks":user.tasks,
+        "createP":user.createP,
+        "addU":user.addU
       });
      return true;
     }

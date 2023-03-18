@@ -33,7 +33,8 @@ class HomeContr{
             endDate:snapshot['endDate'],
             isDone:snapshot['isDone'],
             isLate: snapshot['isLate'],
-            notes:List<String>.from(snapshot['notes'])
+            notes:List<String>.from(snapshot['notes']),
+            creation: snapshot['creation']
         ));
 
      }
@@ -58,7 +59,8 @@ class HomeContr{
                 isDone: doc['isDone'],
                 isLate: doc['isLate'],
                 notes: List<String>.from(doc['notes']),
-                id:doc.id
+                id:doc.id,
+                creation: doc['creation']
               ),
           ).toList(),
       );
@@ -67,6 +69,26 @@ class HomeContr{
       throw Exception("");
     }
   }
+  Stream<List<Project>> getProjects() {
+    return _db.collection('projects').orderBy('creation', descending: true).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Project(
+            title: doc['title'],
+            description: doc['description'],
+            users: List<String>.from(doc['users']),
+            createdBy: doc['createdBy'],
+            startDate: doc['startDate'],
+            endDate: doc['endDate'],
+            isDone: doc['isDone'],
+            isLate: doc['isLate'],
+            notes: List<String>.from(doc['notes']),
+            id:doc.id,
+            creation: doc['creation']
+        );
+      }).toList();
+    });
+  }
+
   void get(String ?docId)async {
     await FirebaseFirestore.instance
         .collection('projects')
@@ -89,6 +111,35 @@ class HomeContr{
 
     } catch (e) {
      throw Exception("Ff");
+    }
+  }
+  Future<bool> isCreateP(String ? uid) async{
+     try{
+       DocumentSnapshot x=await _db.collection('users').doc(uid).get();
+       if(x.exists){
+         return x.get('createP');
+       }
+       else{
+         return false;
+       }
+     }
+     catch(e){
+       throw Exception("");
+     }
+  }
+  Future<bool> isCreateU(String ? uid) async{
+    try{
+      debugPrint("my uid $uid");
+      DocumentSnapshot x=await _db.collection('users').doc(uid).get();
+      if(x.exists){
+        return x.get('addU');
+      }
+      else{
+        return false;
+      }
+    }
+    catch(e){
+      throw Exception("");
     }
   }
 

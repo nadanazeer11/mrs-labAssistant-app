@@ -27,7 +27,7 @@ class _OurProjectsState extends State<OurProjects> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder <List<Project>>(
-      stream: homeC.getPD(),
+      stream: homeC.getProjects(),
       builder: (context,snapshot){
         if(snapshot.hasData){
           List<Project> ?allProjects=snapshot.data;
@@ -144,7 +144,7 @@ class _OurProjectsState extends State<OurProjects> {
                         else if(filter=="Me"){
                         List<String> users= project?.users ?? ["e"];
                           if( project?.users!=null){
-                            if(users.contains(loggedInId)){
+                            if(users.contains(loggedInName)){
                               return Column(
                                 children: [
                                   Project_item(id: project?.id,project:project),

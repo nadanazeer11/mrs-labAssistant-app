@@ -116,7 +116,8 @@ class _Create_ProjectState extends State<Create_Project> {
         createdBy:loggedInName,
         startDate: Timestamp.fromDate(dateTimeRange.start),
         endDate: Timestamp.fromDate(dateTimeRange.end),
-        notes: []);
+        notes: [],
+        creation: Timestamp.fromDate(DateTime.now()));
     try{
       await contr.createProject(project);
       setState(() {

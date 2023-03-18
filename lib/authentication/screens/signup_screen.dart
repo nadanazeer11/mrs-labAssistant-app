@@ -38,7 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
         setState(() {
           _loading=true;
         });
-        Userr user=new Userr(name:usernameController.text,email: emailController.text,password:passwordController.text,projects: [],tasks: []);
+        Userr user=new Userr(name:usernameController.text,email: emailController.text,password:passwordController.text,projects: [],tasks: [],createP:false,addU:true);
         try{
           email=await authenticate.emailCheck(user.email);
           if(!email){
