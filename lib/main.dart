@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mrs/authentication/screens/createU.dart';
 import 'package:mrs/authentication/screens/forget_password.dart';
 import 'package:mrs/authentication/screens/signup_screen.dart';
 import 'package:mrs/createProject/screens/create_project.dart';
@@ -29,12 +30,13 @@ class MyApp extends StatelessWidget {
       ),
     //  home:Login(),
       routes:{
-        '/':(context)=>  Login(),
+        '/':(context)=>  UserState(),
         '/signUp':(context)=>const SignupScreen(),
         '/forgetPassword':(context)=>ForgetPassword(),
         '/home':(context)=>HP(),
         '/addProject':(context)=>Create_Project(),
-        '/projectDetails':(context)=>ProjDescrip()
+        '/projectDetails':(context)=>ProjDescrip(),
+        '/createU':(context)=>CreateU()
       }
     );
   }

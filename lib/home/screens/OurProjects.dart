@@ -31,6 +31,7 @@ class _OurProjectsState extends State<OurProjects> {
       builder: (context,snapshot){
         if(snapshot.hasData){
           List<Project> ?allProjects=snapshot.data;
+          debugPrint("F${allProjects?.length}");
           return Padding(
             padding: const EdgeInsets.fromLTRB(8,28,8,8),
             child: Column(
@@ -100,7 +101,6 @@ class _OurProjectsState extends State<OurProjects> {
                           );
                         }
                         else if(filter=="Late"){
-
                           if(project?.isLate!=null){
                             if(project?.isLate==true){
 
@@ -114,6 +114,12 @@ class _OurProjectsState extends State<OurProjects> {
                                 ],
                               );
                             }
+                            else{
+                              return Container();
+                            }
+                          }
+                          else{
+                            return Container();
                           }
 
                         }
@@ -127,6 +133,12 @@ class _OurProjectsState extends State<OurProjects> {
                                 ],
                               );
                             }
+                            else{
+                              return Container();
+                            }
+                          }
+                          else{
+                            return Container();
                           }
                         }
                         else if(filter=="Upcoming"){
@@ -139,6 +151,12 @@ class _OurProjectsState extends State<OurProjects> {
                                 ],
                               );
                             }
+                            else{
+                              return Container();
+                            }
+                          }
+                          else{
+                            return Container();
                           }
                         }
                         else if(filter=="Me"){
@@ -152,7 +170,16 @@ class _OurProjectsState extends State<OurProjects> {
                                 ],
                               );
                             }
+                            else{
+                              return Container();
+                            }
                           }
+                          else{
+                            return Container();
+                          }
+                        }
+                        else{
+                          return Container();
                         }
 
                       }),

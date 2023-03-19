@@ -1,7 +1,9 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:mrs/authentication/backend/authenticate.dart';
 import 'package:mrs/config/colors.dart';
 import 'package:mrs/home/backend/Home_Controller.dart';
 import 'package:mrs/home/screens/OurProjects.dart';
@@ -19,7 +21,93 @@ class HP extends StatefulWidget {
 }
 
 class _HPState extends State<HP> {
+  String ?errorPass;
+  bool wrongpass=false;
   HomeContr hmc=new HomeContr();
+  var _oldPassContr=TextEditingController();
+  var _newPassContr=TextEditingController();
+  Authenticate authenticate=Authenticate();
+  final changeP=GlobalKey<FormState>();
+  Future<bool> _submitChangeP()async{
+    final isValid=changeP.currentState!.validate();
+    if(isValid){
+      String currentPassword=_oldPassContr.text;
+      String newPassword=_newPassContr.text;
+      try{
+        FirebaseAuthException? res=await authenticate.changePassword(currentPassword, newPassword, loggedInId);
+        if(res!=null){
+          if(res.code=='wrong-password'){
+            showPlatformDialog(
+              context: context,
+              builder: (context) => BasicDialogAlert(
+                title: Text("Authentication Error"),
+                content:
+                Text("Wrong old password entered"),
+                actions: <Widget>[
+                  BasicDialogAction(
+                    title: Text("OK"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+          else{
+            debugPrint("in else");
+            showPlatformDialog(
+              context: context,
+              builder: (context) => BasicDialogAlert(
+                title: Text("Authentication Error"),
+                content:
+                Text("${res.code}"),
+                actions: <Widget>[
+                  BasicDialogAction(
+                    title: Text("OK"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+          return false;
+        }
+        else{
+          debugPrint("no erro");
+          setState(() {
+            errorPass=null;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Password Successfully changed'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        return true;
+      }
+      catch(e){
+        debugPrint("in catchhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred.Please try again!s'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+
+
+    }
+    else{
+      debugPrint("this else whuch means not valid");
+      return false;
+    }
+  }
   bool ?createP;
   bool ?createU;
   String? loggedInId;
@@ -48,7 +136,13 @@ class _HPState extends State<HP> {
           }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
-      body: widgetOptions[indexx],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            widgetOptions[indexx],
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       onTap: onItemTapped,
@@ -85,10 +179,11 @@ class _HPState extends State<HP> {
                       child: Text('Drawer Header'),
                     ),
                     createU==true?ListTile(
-                      title:const Text('Create User',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:Colors.white),),
-                      leading: Icon(FeatherIcons.user,color: Colors.white,),
+                      title:const Text('Create User',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
+                      leading: Icon(FeatherIcons.user,color: Colors.white,size: 30,),
                       onTap: () {
                         Navigator.pop(context);
+                        Navigator.pushNamed(context, '/createU');
                       },
                     ):Container(),
                     Divider(
@@ -96,8 +191,8 @@ class _HPState extends State<HP> {
                       color: Colors.black,
                     ),
                     createP==true?ListTile(
-                      title:const Text('Create Project',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:Colors.white),),
-                      leading: Icon(FeatherIcons.folder,color: Colors.white,),
+                      title:const Text('Create Project',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
+                      leading: Icon(FeatherIcons.folder,color: Colors.white,size: 30,),
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/addProject');
@@ -116,10 +211,101 @@ class _HPState extends State<HP> {
               alignment: Alignment.bottomLeft,
               child: ListTile(
                 tileColor: AppColorss.darkmainColor,
-                title:const Text('Change Password',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:Colors.white),),
-                leading: Icon(FeatherIcons.logOut,color: Colors.white,),
+                title:const Text('Change Password',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
+                leading: Icon(Icons.password,color: Colors.white,size: 30,),
                 onTap: () {
                   Navigator.pop(context);
+                  showPlatformDialog(
+                    context: context,
+                    builder: (c) => StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return BasicDialogAlert(
+                          title: Column(
+                            children: [
+                              Text("Change Password"),
+                            ],
+                          ),
+                          content: SingleChildScrollView(
+                            child: Form(
+                              key: changeP,
+                              child: Column(
+                                children: [
+                                  FractionallySizedBox(
+                                    widthFactor: 0.8,
+                                    child: TextFormField(
+                                        controller: _oldPassContr,
+                                        decoration: InputDecoration(
+                                          labelText: 'Current Password',
+                                          hintText: 'Enter Your current password',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator: (value) {
+                                          if (value!.isEmpty) {
+                                            return "Enter your old password";
+                                          }
+                                          return null;
+                                        }),
+                                  ),
+                                  SizedBox(
+                                    height: 14,
+                                  ),
+                                  FractionallySizedBox(
+                                    widthFactor: 0.8,
+                                    child: TextFormField(
+                                        controller: _newPassContr,
+                                        decoration: InputDecoration(
+                                          labelText: 'New Password',
+                                          hintText: 'Enter Your New Password',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator: (value) {
+                                          if (value!.isEmpty || value!.length < 6) {
+                                            return "Password should be at least 6 characters";
+                                          }
+                                          return null;
+                                        }),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          actions: <Widget>[
+                            BasicDialogAction(
+                              title: Text(
+                                "Yes",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              onPressed: () async {
+                                bool x = await _submitChangeP();
+                                if (x == true) {
+                                  Navigator.pop(context);
+                                  _oldPassContr.clear();
+                                  _newPassContr.clear();
+                                } else {
+
+                                }
+                              },
+                            ),
+                            BasicDialogAction(
+                              title: Text(
+                                "No",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _oldPassContr.clear();
+                                _newPassContr.clear();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+
                 },
               ),
             ),
@@ -127,10 +313,37 @@ class _HPState extends State<HP> {
               alignment: Alignment.bottomLeft,
               child: ListTile(
                 tileColor: AppColorss.darkmainColor,
-                title:const Text('Log Out',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:Colors.white),),
-                leading: Icon(FeatherIcons.logOut,color: Colors.white,),
+                title:const Text('Log Out',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
+                leading: Icon(FeatherIcons.logOut,color: Colors.white,size: 30,),
                 onTap: () {
                   Navigator.pop(context);
+                  showPlatformDialog(
+                    context: context,
+                    builder: (c) => BasicDialogAlert(
+                      title: Text("Log Out"),
+                      content:
+                      Text("Are you sure you want to log out?"),
+                      actions: <Widget>[
+                        BasicDialogAction(
+                          title: Text("Yes",style: TextStyle(color: Colors.black),),
+                          onPressed: () async {
+                             await authenticate.logoutMethod();
+                            debugPrint("logout");
+                            Navigator.popAndPushNamed(context, '/');
+                            //Navigator.pop(c);
+                          },
+                        ),
+                        BasicDialogAction(
+                          title: Text("No",style: TextStyle(color: Colors.black),),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+
+                      ],
+                    ),
+                  );
+
                 },
               ),
             ),
@@ -139,7 +352,83 @@ class _HPState extends State<HP> {
       ),
     );
   }
+  void show(){
+    showPlatformDialog(
+      context: context,
+      builder: (c) => BasicDialogAlert(
+        title: Column(
+          children: [
+            Text("Change Password"),
+          ],
+        ),
+        content:SingleChildScrollView(
+          child: Form(
+            key:changeP,
+            child: Column(
+              children: [
+                FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: TextFormField(
+                      controller: _oldPassContr,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'Enter Users Email',
+                        border: OutlineInputBorder(
+                        ),
+                      ),
+                      validator:(value) {
+                        if (value!.isEmpty) {
+                          return "Enter your old password";
+                        }
+                        return null;
+                      }),
+                ),
+                SizedBox(height: 14,),
+                FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: TextFormField(
+                      controller: _newPassContr,
+                      decoration: InputDecoration(
+                        labelText: 'New Password',
+                        hintText: 'Enter Your New Password',
+                        border: OutlineInputBorder(
 
+                        ),
+                      ),
+                      validator:(value) {
+                        if (value!.isEmpty || value!.length<6) {
+                          return "Password should be at least 6 characters";
+                        }
+                        return null;
+                      }),
+                ),
+                SizedBox(height: 5,),
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          BasicDialogAction(
+            title: Text("Yes",style: TextStyle(color: Colors.black),),
+            onPressed: () async {
+              bool x=await _submitChangeP();
+              if(x==true){
+                Navigator.pop(context);
+              }
+              //Navigator.pop(c);
+            },
+          ),
+          BasicDialogAction(
+            title: Text("No",style: TextStyle(color: Colors.black),),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+
+        ],
+      ),
+    );
+  }
   @override
   void initState() {
     super.initState();
@@ -155,6 +444,7 @@ class _HPState extends State<HP> {
     try {
       String x=await getIdofUser();
       debugPrint("ana f your projects $x ");
+      debugPrint("logged in id $x");
       setState(() {
         loggedInId=x;
       });
