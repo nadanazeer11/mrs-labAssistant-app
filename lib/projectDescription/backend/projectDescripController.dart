@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mrs/models/Users.dart';
 import 'package:velocity_x/velocity_x.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../models/Notes.dart';
 import '../../models/Project.dart';
-
+import 'dart:io';
 class ProjectDContr{
   FirebaseFirestore _db=FirebaseFirestore.instance;
 
@@ -116,5 +116,15 @@ class ProjectDContr{
     catch(e){
       throw Exception("f");
     }
+  }
+  UploadTask? uploadFile(String destination,File file){
+    try{
+      final ref=FirebaseStorage.instance.ref(destination);
+      return ref.putFile(file);
+    }
+    on FirebaseAuthException catch (e){
+      return null;
+    }
+
   }
 }

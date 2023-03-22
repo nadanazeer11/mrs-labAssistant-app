@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-//import './fillHome.dart';
-import 'package:fluentui_icons/fluentui_icons.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:ui';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-
+import 'package:file_picker/file_picker.dart';
 import '../../common.dart';
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
@@ -15,8 +15,10 @@ import '../../home/backend/Home_Controller.dart';
 import '../../models/Notes.dart';
 import '../../models/Project.dart';
 import 'package:intl/intl.dart';
-
+import 'package:path_provider/path_provider.dart';
 import '../backend/projectDescripController.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart';
 
 class ProjDescrip extends StatefulWidget {
   const ProjDescrip({Key? key}) : super(key: key);
@@ -37,8 +39,63 @@ class _ProjDescripState extends State<ProjDescrip> {
   List<String> ?myNotesId;
   List<bool>isSelected=[true,false]; //public,not pub;lic
   bool allow=true;
+  bool upload=false;
   TextEditingController _notesText=TextEditingController();
-  void sendNote(String text)async{
+  File? file;
+  List<String> ? notesIds=[];
+  String fileName="No file Selected";
+  UploadTask? task;
+  bool addMyComment=false;
+  bool switchPublic=false;
+  Future<String> selectFile()async {
+    final result=await FilePicker.platform.pickFiles();
+    if(result==null) return "1234";
+    final path=result.files.single.path!;
+    setState(() {
+      file=File(path);
+      fileName=basename(basename(file!.path));
+    });
+    debugPrint("ya nada $fileName");
+    return fileName;
+
+  }
+  Future<void >uploadFile(BuildContext context)async{
+    if(file==null) return;
+    String fileName=basename(file!.path);
+    final destination='/$fileName';
+
+   task= pdc.uploadFile(destination, file!);
+   setState(() {
+
+   });
+    if (task ==null){
+     return  showPlatformDialog(
+          context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text("Uploading error"),
+            content:
+            Text("An Error occured while trying to upload, please try again"),
+            actions: <Widget>[
+              BasicDialogAction(
+                title: Text("OK"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ));
+
+      }
+    else{
+      final snapshot=await task!.whenComplete((){});
+      final urlDownload=await snapshot.ref.getDownloadURL();
+      debugPrint("Download linkkkkkkkkkkkkkkkkkkkk $urlDownload");
+    }
+
+
+  debugPrint("upload file with name $fileName");
+  }
+  void sendNote(String text,BuildContext context)async{
     try{
       DateTime x=DateTime.now();
       bool z=isSelected[0]==true ? true : false;
@@ -55,9 +112,8 @@ class _ProjDescripState extends State<ProjDescrip> {
     }
   }
 
-  List<String> ? notesIds=[];
-
   @override
+
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments ;
     id = (args as Map<String, dynamic>)['id'];
@@ -197,7 +253,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
   scroll(BuildContext context,List<String>? ids){
     double w=MediaQuery.of(context).size.width;
-
+    final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
     final h = MediaQuery.of(context).size.height;
     final initialChildSize = 0.5;
     return Container(
@@ -226,88 +282,138 @@ class _ProjDescripState extends State<ProjDescrip> {
                         children: [
                           Text("Notes:",style: TextStyle(fontSize: 21,fontWeight: FontWeight.w500,color: Colors.white),),
                           IconButton(onPressed: (){
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => AlertDialog(
-                                title: Text(
-                                  "Add Note",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.visible,
-                                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
-                                ),
-                                content: StatefulBuilder(
-                                  builder: (BuildContext context, StateSetter setState) {
-                                    return SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          TextFormField(
-                                            controller: _notesText,
-                                            minLines: 3,
-                                            maxLines: 4,
-                                            decoration: InputDecoration(
-                                                hintText: "Enter your note here",
-                                                border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.all(Radius.circular(10))
-                                                )
-                                            ),
-                                          ),
-                                          SizedBox(height: 10,),
-                                          ToggleButtons(
-                                            isSelected: isSelected,
-                                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                            onPressed: (int index) {
-                                              setState(() {
-                                                for (int buttonIndex = 0; buttonIndex < isSelected.length; buttonIndex++) {
-                                                  if (buttonIndex == index) {
-                                                    isSelected[buttonIndex] = true;
-                                                  } else {
-                                                    isSelected[buttonIndex] = false;
-                                                  }
-                                                }
-                                              });
-                                            },
-                                            children:  <Widget>[
-                                            Icon(
-                                            Icons.public_outlined,
-                                            color: isSelected[0] == true ? Color(0xFF09126C) : Color.fromRGBO(62, 68, 71, 1),
-                                          ),
-                                            Icon(
-                                        Icons.public_off_outlined,
-                                        color: isSelected[1] == true ? Color(0xFF09126C) : Color.fromRGBO(62, 68, 71, 1),
-                                      ),
-
-                                      ],
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {_notesText.clear();Navigator.pop(context, 'Cancel');
-                                    setState(() {
-                                      isSelected=[true,false];
-                                    });},
-                                    child: const Text('Cancel',style:TextStyle( color:Color(0xFF005466),fontSize: 19),),
-
-                                  ),
-                                  TextButton(
-                                    onPressed: (){
-                                      sendNote(_notesText.text);
-                                      Navigator.pop(context, 'Yes');
-                                      _notesText.clear();
-
-                                    },
-                                    child: const Text('Submit',style:TextStyle( color:Color.fromRGBO(230, 46, 4, 1),fontSize: 19),),
-                                  ),
-                                ],
-                              ),
-                            );
+                            setState(() {
+                              addMyComment=true;
+                            });
                           }, icon: Icon(Icons.add))
                         ],
                       ),
                     ),
+                  addMyComment==true?
+                  Center(
+                    child: FractionallySizedBox(
+                      widthFactor: 0.9,
+                      alignment: Alignment.center,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: AppColorss.darkmainColor,
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 2.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(8,8,0,0),
+                                  child: Row(
+                                    children: [
+                                      Text("Your note",style: TextStyle(fontWeight: FontWeight.w600,color: Colors.black,fontSize: 18),),
+                                      Expanded(
+                                        child: Align(
+                                          alignment:Alignment.bottomLeft,
+                                          child: SwitchListTile(
+                                            title: switchPublic==true ? Icon(FeatherIcons.unlock) :  Icon(FeatherIcons.lock),
+                                            onChanged: (bool value){
+                                              setState(() {
+                                                switchPublic=value;
+                                              });},
+                                            value: switchPublic,
+                                            activeColor: AppColorss.activeColor,
+                                            contentPadding: EdgeInsets.symmetric(horizontal: 100),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: TextField(
+                                      maxLines: null,
+                                      keyboardType: TextInputType.multiline,
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                        hintText: 'Add a comment',
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Row(children: [
+                                  IconButton(onPressed: ()async {
+                                    String boolean=  await selectFile();
+                                    debugPrint("el string aho $boolean");
+                                    if (boolean!="1234"){
+                                      setState(() {
+                                        upload=true;
+                                      });
+                                    }
+                                  }, icon: Icon(FeatherIcons.paperclip,),color: Colors.black,),
+                                  Expanded(
+                                    child: Text(
+                                      fileName,
+                                      style: TextStyle(fontSize: 16, color: AppColorss.fontGrey),
+                                    ),
+                                  ),
+                                  fileName!="No file Selected"  && task==null ?      IconButton(onPressed: (){
+                                    uploadFile(context);
+                                  }, icon:Icon(FeatherIcons.upload)):Container(),
+                                  fileName!="No file Selected" && task==null ? IconButton(onPressed: (){
+                                    setState(() {
+                                      fileName="No file Selected";
+                                      file=null;
+                                      upload=false;
+                                    },);
+                                  }, icon: Icon(Icons.delete),color: AppColorss.redColor,):Container(),
+
+                                ],),
+                                task!=null ? Padding(
+                                  padding: const EdgeInsets.only(left: 13),
+                                  child: buildUploadStatus(task!),
+                                ):Container(),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(onPressed: (){
+                                      setState(() {
+                                       fileName="No file Selected";
+                                       file=null;
+                                       task=null;
+                                       switchPublic=false;
+                                       addMyComment=false;
+                                      });
+                                    }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: AppColorss.redColor),)),
+                                    TextButton(onPressed: (){}, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)),
+                                  ],
+                                )
+
+
+                          ]),
+                        ),
+                    ),
+                  ):Container(),
+                    SizedBox(height: 15,),
+
+
                     steps(context,ids),
                   ],
                 ),
@@ -317,6 +423,25 @@ class _ProjDescripState extends State<ProjDescrip> {
       ),
     );
   }
+  Widget buildUploadStatus(UploadTask task)=> StreamBuilder<TaskSnapshot>(
+    stream:task.snapshotEvents,
+    builder: (context,snapshot){
+      if(snapshot.hasData){
+        final snap=snapshot.data!;
+        final progress=snap.bytesTransferred/snap.totalBytes;
+        final percentage=(progress*100).toStringAsFixed(2);
+        debugPrint("percentage ya bro $percentage");
+        return Text(
+          'Uploading $percentage %',
+          style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: Colors.green),
+        );
+      }
+      else{
+        debugPrint("in else of stream builder");
+        return Container();
+      }
+    }
+  );
   steps(BuildContext context,List<String>? ids)  {
     return FutureBuilder<List<Notes>>(
       future:pdc.getNotes(ids),
@@ -387,19 +512,6 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 public == true
                                     ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                     : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
-                                // speak==true? IconButton(onPressed: (){
-                                //   debugPrint("play");
-                                //   setState(() {
-                                //     speakStates[index]=false;
-                                //   });
-                                // }, icon: Icon(FeatherIcons.play,size: 16,))
-                                //     :
-                                // IconButton(onPressed: (){
-                                //   debugPrint("pause");
-                                //   setState(() {
-                                //     speakStates[index]=true;
-                                //   });
-                                // }, icon: Icon(FeatherIcons.pause,size:16))
                                PlayPauseButton(text: projNotes?[index].note)
                               ],
                             )
@@ -430,9 +542,11 @@ class _ProjDescripState extends State<ProjDescrip> {
     _loadData();
   }
   void _loadData() async {
+    debugPrint("load data");
     await _getLoggedInId();
     await _getLoggedInName();
     await _see();
+    // await saveFile();
   }
   Future<void> _getLoggedInName()async{
     try {
@@ -474,13 +588,14 @@ class _ProjDescripState extends State<ProjDescrip> {
       debugPrint("allow $allow");
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!s'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint("error in see");
     }
+  }
+  Future<void> saveFile() async {
+    final file = File('${(await getApplicationDocumentsDirectory()).path}/example.txt');
+    await file.create();
+    await file.writeAsString('Hello, World!');
+    debugPrint("creaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate");
   }
 }
 
