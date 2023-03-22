@@ -23,14 +23,18 @@ class ProjectDContr{
             user: noteSnapshot.get('user'),
             note: noteSnapshot.get('note'),
             time: noteSnapshot.get('time'),
-            public: noteSnapshot.get('publiv')
+            public: noteSnapshot.get('publiv'),
+            url: noteSnapshot.get('url'),
+            baseName: noteSnapshot.get('baseName'),
         );
       } else {
         return Notes(
           user:"N/A",
           note: "no note found!",
           time:Timestamp.fromDate(DateTime.now()),
-          public: false
+          public: false,
+          url: "",
+          baseName: ""
         );
       }
     }
@@ -77,7 +81,9 @@ class ProjectDContr{
               note: data['note'],
               user: data['user'],
               time: data['time'],
-              public: data['public']
+              public: data['public'],
+              url: data['url'],
+              baseName: data['baseName']
             ));
           }
         }

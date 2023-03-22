@@ -47,6 +47,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   UploadTask? task;
   bool addMyComment=false;
   bool switchPublic=false;
+  String url="";
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
     if(result==null) return "1234";
@@ -89,18 +90,31 @@ class _ProjDescripState extends State<ProjDescrip> {
     else{
       final snapshot=await task!.whenComplete((){});
       final urlDownload=await snapshot.ref.getDownloadURL();
+      setState(() {
+        url=urlDownload;
+      });
       debugPrint("Download linkkkkkkkkkkkkkkkkkkkk $urlDownload");
     }
 
 
   debugPrint("upload file with name $fileName");
   }
-  void sendNote(String text,BuildContext context)async{
+  Future<void> sendNote(String text,BuildContext context)async{
     try{
       DateTime x=DateTime.now();
       bool z=isSelected[0]==true ? true : false;
-      Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z);
+      Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
       await pdc.addNote(note,id);
+      setState(() {
+        setState(() {
+          fileName="No file Selected";
+          file=null;
+          task=null;
+          switchPublic=false;
+          addMyComment=false;
+          url="";
+        });
+      });
     }
     catch(e){
       ScaffoldMessenger.of(context).showSnackBar(
@@ -253,7 +267,6 @@ class _ProjDescripState extends State<ProjDescrip> {
 
   scroll(BuildContext context,List<String>? ids){
     double w=MediaQuery.of(context).size.width;
-    final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
     final h = MediaQuery.of(context).size.height;
     final initialChildSize = 0.5;
     return Container(
@@ -348,6 +361,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: TextField(
+                                      controller: _notesText,
                                       maxLines: null,
                                       keyboardType: TextInputType.multiline,
                                       decoration: InputDecoration(
@@ -382,6 +396,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       fileName="No file Selected";
                                       file=null;
                                       upload=false;
+                                      url="";
                                     },);
                                   }, icon: Icon(Icons.delete),color: AppColorss.redColor,):Container(),
 
@@ -400,9 +415,15 @@ class _ProjDescripState extends State<ProjDescrip> {
                                        task=null;
                                        switchPublic=false;
                                        addMyComment=false;
+                                       url="";
                                       });
                                     }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: AppColorss.redColor),)),
-                                    TextButton(onPressed: (){}, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)),
+                                    TextButton(onPressed: ()async {
+                                      await sendNote(_notesText.text, context);
+                                      setState(() {
+                                        addMyComment=false;
+                                      });
+                                    }, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)),
                                   ],
                                 )
 
@@ -448,7 +469,6 @@ class _ProjDescripState extends State<ProjDescrip> {
       builder: (context,snapshot){
         if(snapshot.hasData){
           List<Notes>? projNotes=snapshot.data;
-
           debugPrint("gggg ${projNotes?.length}");
           return ListView.builder(
             itemCount: projNotes?.length??0,
@@ -460,6 +480,7 @@ class _ProjDescripState extends State<ProjDescrip> {
               String datee=DateFormat('dd/MM/yy').format(x!).toString();
               String time=DateFormat('HH:mm').format(x!).toString();
               bool? public =projNotes?[index].public;
+              String? baseNamee=projNotes?[index].baseName;
               if(public==true||allow==true){
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4,0,3,27),
@@ -512,7 +533,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 public == true
                                     ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                     : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
-                               PlayPauseButton(text: projNotes?[index].note)
+                               PlayPauseButton(text: projNotes?[index].note),
+                                baseNamee!="" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: Text("$baseNamee"))): Container()
+
                               ],
                             )
                           ],
