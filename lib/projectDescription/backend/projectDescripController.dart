@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mrs/models/Users.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:velocity_x/velocity_x.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../models/Notes.dart';
@@ -132,5 +133,30 @@ class ProjectDContr{
       return null;
     }
 
+  }
+  Future<String> downloadFile(String? ref) async{
+    try{
+      // final dir=await DownloadsPathProvider.downloadsDirectory;
+      final dir=await getApplicationDocumentsDirectory();
+      final FirebaseStorage storage=FirebaseStorage.instance;
+      String x= ref ?? "sorry.png";
+      Reference ref2=storage.ref().child(x);
+      final file=File('${dir.path}/${x}');
+      String link=await ref2.getDownloadURL();
+      debugPrint("hey ${link}");
+      debugPrint("dir ${dir}");
+      try{
+        await ref2.writeToFile(file);
+        return "done";
+      }
+      catch(e){
+        return "was not able to download";
+      }
+
+
+    }
+    catch(e){
+      return "was not able to get reference";
+    }
   }
 }

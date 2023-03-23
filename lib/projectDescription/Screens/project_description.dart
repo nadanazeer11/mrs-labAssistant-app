@@ -8,10 +8,12 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:get/get.dart';
 import '../../common.dart';
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
 import '../../home/backend/Home_Controller.dart';
+import '../../models/FileObj.dart';
 import '../../models/Notes.dart';
 import '../../models/Project.dart';
 import 'package:intl/intl.dart';
@@ -467,6 +469,9 @@ class _ProjDescripState extends State<ProjDescrip> {
     return FutureBuilder<List<Notes>>(
       future:pdc.getNotes(ids),
       builder: (context,snapshot){
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
         if(snapshot.hasData){
           List<Notes>? projNotes=snapshot.data;
           debugPrint("gggg ${projNotes?.length}");
@@ -481,6 +486,7 @@ class _ProjDescripState extends State<ProjDescrip> {
               String time=DateFormat('HH:mm').format(x!).toString();
               bool? public =projNotes?[index].public;
               String? baseNamee=projNotes?[index].baseName;
+              String ? urll=projNotes?[index].url;
               if(public==true||allow==true){
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4,0,3,27),
@@ -534,8 +540,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                                     ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                     : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
                                PlayPauseButton(text: projNotes?[index].note),
-                                baseNamee!="" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: Text("$baseNamee"))): Container()
-
+                                baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(onPressed: (){
+                                  Navigator.pushNamed(context, '/fileScreen',arguments: FileObj(url: urll,baseName: baseNamee));
+                                }, child: Text("$baseNamee",style: TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
                               ],
                             )
                           ],
@@ -552,6 +559,9 @@ class _ProjDescripState extends State<ProjDescrip> {
             },
 
           );
+        }
+        if(!snapshot.hasData){
+          return Center(child:Text("No notes yet",style: TextStyle(fontSize: 16,color: Colors.black54),));
         }
         else{
           return Container();
