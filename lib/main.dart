@@ -6,6 +6,7 @@ import 'package:mrs/authentication/screens/signup_screen.dart';
 import 'package:mrs/createProject/screens/create_project.dart';
 import 'package:mrs/home/screens/HP.dart';
 import 'package:mrs/projectDescription/Screens/fileScreen.dart';
+import 'package:mrs/projectDescription/Screens/imgScree.dart';
 import 'package:mrs/projectDescription/Screens/project_description.dart';
 import 'package:mrs/user_state.dart';
 
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/projectDetails':(context)=>ProjDescrip(),
         '/createU':(context)=>CreateU(),
         '/fileScreen':(context)=>fileScreen(),
+        '/imgScreen':(context)=>imgScreen()
       }
     );
   }

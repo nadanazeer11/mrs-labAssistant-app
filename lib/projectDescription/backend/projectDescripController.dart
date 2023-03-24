@@ -8,6 +8,7 @@ import 'package:velocity_x/velocity_x.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../models/Notes.dart';
 import '../../models/Project.dart';
+import 'package:path/path.dart';
 import 'dart:io';
 class ProjectDContr{
   FirebaseFirestore _db=FirebaseFirestore.instance;
@@ -158,5 +159,22 @@ class ProjectDContr{
     catch(e){
       return "was not able to get reference";
     }
+  }
+  Future<File> loadFirebase(String url) async {
+    try {
+      final refPDF = FirebaseStorage.instance.ref().child(url);
+      final bytes = await refPDF.getData();
+      return _storeFile(url, bytes as List<int>);
+    } catch (e) {
+      throw Exception("");
+    }
+  }
+  Future<File> _storeFile(String url, List<int> bytes) async {
+    final filename = basename(url);
+    final dir = await getApplicationDocumentsDirectory();
+
+    final file = File('${dir.path}/$filename');
+    await file.writeAsBytes(bytes, flush: true);
+    return file;
   }
 }

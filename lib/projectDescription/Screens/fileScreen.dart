@@ -20,10 +20,12 @@ class _fileScreenState extends State<fileScreen> {
     ProjectDContr pdc=new ProjectDContr();
     bool loading=false;
     final args=ModalRoute.of(context)!.settings.arguments as FileObj;
+    String link=args.url ?? "https://firebasestorage.googleapis.com/v0/b/mrslab-1c119.appspot.com/o/images.png?alt=media&token=87f0491f-aa66-4f2b-8437-20404a819e1c";
     if(args.url==null || args.baseName==null){
       return Center(child:Text("nothing to see",style: TextStyle(fontSize: 16,color: AppColorss.darkmainColor),));
     }
     else{
+      debugPrint("url gay sa7 $link");
       return SafeArea(
           child:Scaffold(
             appBar:AppBar(
@@ -100,8 +102,37 @@ class _fileScreenState extends State<fileScreen> {
                      }
                     }, icon:Icon(Icons.download))
                   ],),
-                )
-              ]),
+                ),
+                // Stack(
+                //   children: [
+                //     Image.network(
+                //       link,
+                //       // height: double.infinity,
+                //       // width: double.infinity,
+                //       errorBuilder: (context,error,stackTrace)=>Text("Error loading the image"),
+                //     ),
+                //     Center(child: CircularProgressIndicator(),)
+                //   ],
+                // ),
+            Image.network(
+                link,
+                fit: BoxFit.fill,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, exception, stackTrace) {
+                  return Text("Error loading the image");
+                }
+            )]),
             ),
           )
       );

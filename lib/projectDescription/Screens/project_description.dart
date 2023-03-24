@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
+import 'package:mrs/projectDescription/Screens/x.dart';
 import '../../common.dart';
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
@@ -105,18 +106,36 @@ class _ProjDescripState extends State<ProjDescrip> {
     try{
       DateTime x=DateTime.now();
       bool z=isSelected[0]==true ? true : false;
-      Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
-      await pdc.addNote(note,id);
-      setState(() {
+      if(url=="" || fileName=="No file Selected"){
+        Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
+        await pdc.addNote(note,id);
         setState(() {
-          fileName="No file Selected";
-          file=null;
-          task=null;
-          switchPublic=false;
-          addMyComment=false;
-          url="";
+          setState(() {
+            fileName="No file Selected";
+            file=null;
+            task=null;
+            switchPublic=false;
+            addMyComment=false;
+            url="";
+          });
         });
-      });
+      }
+      else if(url != "" && fileName!="No file Selected"){
+        Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
+        await pdc.addNote(note,id);
+        setState(() {
+          setState(() {
+            fileName="No file Selected";
+            file=null;
+            task=null;
+            switchPublic=false;
+            addMyComment=false;
+            url="";
+          });
+        });
+
+      }
+
     }
     catch(e){
       ScaffoldMessenger.of(context).showSnackBar(
@@ -540,9 +559,41 @@ class _ProjDescripState extends State<ProjDescrip> {
                                     ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                     : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
                                PlayPauseButton(text: projNotes?[index].note),
-                                baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(onPressed: (){
-                                  Navigator.pushNamed(context, '/fileScreen',arguments: FileObj(url: urll,baseName: baseNamee));
-                                }, child: Text("$baseNamee",style: TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
+                                baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(
+                                    onPressed: () async {
+                                      bool hasPdfExtension = baseNamee?.toLowerCase().endsWith('.pdf') ?? false;
+                                      if(hasPdfExtension){
+                                        final file = await pdc.loadFirebase(baseNamee!);
+                                        if (file == null) return;
+                                        openPDF(context, file);
+                                      }
+                                      else{
+                                        bool isImage = baseNamee != null &&
+                                            (baseNamee.toLowerCase().endsWith('.jpg') ||
+                                                baseNamee.toLowerCase().endsWith('.jpeg') ||
+                                                baseNamee.toLowerCase().endsWith('.png') ||
+                                                baseNamee.toLowerCase().endsWith('.gif') ||
+                                                baseNamee.toLowerCase().endsWith('.bmp'));
+                                        if(isImage){
+                                          debugPrint("this is an image");
+                                          Navigator.pushNamed(context, '/fileScreen',arguments:FileObj(baseName: baseNamee, url: urll));
+                                        }
+                                        else{
+                                          bool isVideo = baseNamee != null &&
+                                              (baseNamee.toLowerCase().endsWith('.mp4') ||
+                                                  baseNamee.toLowerCase().endsWith('.mov') ||
+                                                  baseNamee.toLowerCase().endsWith('.avi') ||
+                                                  baseNamee.toLowerCase().endsWith('.wmv') ||
+                                                  baseNamee.toLowerCase().endsWith('.mkv'));
+                                          if(isVideo){
+
+                                          }
+                                        }
+
+                                      }
+
+                                    },
+                                    child: Text("$baseNamee",style: TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
                               ],
                             )
                           ],
@@ -569,6 +620,12 @@ class _ProjDescripState extends State<ProjDescrip> {
       }
     );
   }
+  void openPDF(BuildContext context, File file) {
+      Navigator.of(context).push(
+    MaterialPageRoute(builder: (context) => PDFViewerPage(file: file)),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -579,7 +636,13 @@ class _ProjDescripState extends State<ProjDescrip> {
     await _getLoggedInId();
     await _getLoggedInName();
     await _see();
+    //await _try();
     // await saveFile();
+  }
+  Future<void> _try()async{
+    final ref=FirebaseStorage.instance.ref().child("images.png");
+    final url=await ref.getDownloadURL();
+    debugPrint("images url $url");
   }
   Future<void> _getLoggedInName()async{
     try {
