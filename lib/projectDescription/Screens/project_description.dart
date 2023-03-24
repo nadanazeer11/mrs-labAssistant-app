@@ -51,6 +51,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   bool addMyComment=false;
   bool switchPublic=false;
   String url="";
+  bool sendButton=true;
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
     if(result==null) return "1234";
@@ -96,6 +97,13 @@ class _ProjDescripState extends State<ProjDescrip> {
       setState(() {
         url=urlDownload;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Document successfully uploaded!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
       debugPrint("Download linkkkkkkkkkkkkkkkkkkkk $urlDownload");
     }
 
@@ -104,47 +112,60 @@ class _ProjDescripState extends State<ProjDescrip> {
   }
   Future<void> sendNote(String text,BuildContext context)async{
     try{
-      DateTime x=DateTime.now();
-      bool z=isSelected[0]==true ? true : false;
-      if(url=="" || fileName=="No file Selected"){
-        Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
-        await pdc.addNote(note,id);
-        setState(() {
+      await uploadFile(context);
+      try{
+        DateTime x=DateTime.now();
+        bool z=isSelected[0]==true ? true : false;
+        if(url=="" || fileName=="No file Selected"){
+          Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
+          await pdc.addNote(note,id);
           setState(() {
-            fileName="No file Selected";
-            file=null;
-            task=null;
-            switchPublic=false;
-            addMyComment=false;
-            url="";
+            setState(() {
+              fileName="No file Selected";
+              file=null;
+              task=null;
+              switchPublic=false;
+              addMyComment=false;
+              url="";
+            });
           });
-        });
-      }
-      else if(url != "" && fileName!="No file Selected"){
-        Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
-        await pdc.addNote(note,id);
-        setState(() {
+        }
+        else if(url != "" && fileName!="No file Selected"){
+          Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
+          await pdc.addNote(note,id);
           setState(() {
-            fileName="No file Selected";
-            file=null;
-            task=null;
-            switchPublic=false;
-            addMyComment=false;
-            url="";
+            setState(() {
+              fileName="No file Selected";
+              file=null;
+              task=null;
+              switchPublic=false;
+              addMyComment=false;
+              url="";
+            });
           });
-        });
+
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Note successfully uploaded!'),
+            backgroundColor: Colors.green,
+          ),
+        );
 
       }
-
+      catch(e){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred.Please try again!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!'),
-          backgroundColor: Colors.red,
-        ),
-      );
+
     }
+
   }
 
   @override
@@ -229,7 +250,25 @@ class _ProjDescripState extends State<ProjDescrip> {
                             PopupMenuButton<String>(
                               icon: Icon(Icons.people),
                               itemBuilder: (BuildContext context) {
+                                // if (project?.users != null) {
+                                //
+                                //   return project!.users.map((String option) {
+                                //     return PopupMenuItem<String>(
+                                //       value: option,
+                                //       child: Text(option),
+                                //     );
+                                //   }).toList();
+                                // }
+                                debugPrint("empty");
                                 if (project?.users != null) {
+                                  if (project!.users.isEmpty) {
+                                    return [
+                                      PopupMenuItem<String>(
+                                        value: null,
+                                        child: Text('No users available'),
+                                      ),
+                                    ];
+                                  }
                                   return project!.users.map((String option) {
                                     return PopupMenuItem<String>(
                                       value: option,
@@ -237,6 +276,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                     );
                                   }).toList();
                                 }
+
                                 return <PopupMenuEntry<String>>[];
                               },
 
@@ -318,6 +358,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                           IconButton(onPressed: (){
                             setState(() {
                               addMyComment=true;
+                              sendButton=true;
                             });
                           }, icon: Icon(Icons.add))
                         ],
@@ -409,10 +450,10 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       style: TextStyle(fontSize: 16, color: AppColorss.fontGrey),
                                     ),
                                   ),
-                                  fileName!="No file Selected"  && task==null ?      IconButton(onPressed: (){
-                                    uploadFile(context);
-                                  }, icon:Icon(FeatherIcons.upload)):Container(),
-                                  fileName!="No file Selected" && task==null ? IconButton(onPressed: (){
+                                  // fileName!="No file Selected"  && task==null ?      IconButton(onPressed: (){
+                                  //   uploadFile(context);
+                                  // }, icon:Icon(FeatherIcons.upload)):Container(),
+                                  fileName!="No file Selected" ? IconButton(onPressed: (){
                                     setState(() {
                                       fileName="No file Selected";
                                       file=null;
@@ -439,12 +480,16 @@ class _ProjDescripState extends State<ProjDescrip> {
                                        url="";
                                       });
                                     }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: AppColorss.redColor),)),
-                                    TextButton(onPressed: ()async {
+                                    sendButton==true?TextButton(onPressed: ()async {
+                                      setState(() {
+                                        sendButton=false;
+                                      });
                                       await sendNote(_notesText.text, context);
                                       setState(() {
                                         addMyComment=false;
                                       });
-                                    }, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)),
+                                      debugPrint("boolean $sendButton");
+                                    }, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)):Container(),
                                   ],
                                 )
 

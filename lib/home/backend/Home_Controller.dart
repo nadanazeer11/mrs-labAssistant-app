@@ -142,5 +142,108 @@ class HomeContr{
       throw Exception("");
     }
   }
+  Future<List<String>> getProjUsers(String ? id)async{
+    try{
+      DocumentSnapshot snapshot=await _db.collection('projects').doc(id).get();
+      List<String> users=List<String>.from(snapshot.get('users'));
+      return users;
+    }
+    catch(e){
+      throw Exception("d");
 
+    }
+  }
+  Future<List<String>> getUserNames() async {
+    final List<String> userNames = [];
+    try{
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .get();
+      for (final DocumentSnapshot<Map<String, dynamic>> documentSnapshot in querySnapshot.docs) {
+        final Map<String, dynamic>? data = documentSnapshot.data();
+        if (data != null && data.containsKey('name')) {
+          userNames.add(data['name'] as String);
+        }
+      }
+      for (String username in userNames) {
+        debugPrint(username);
+      }
+    }
+    catch(e){
+      throw Exception("w");
+    }
+
+    return userNames;
+  }
+  Future<void> editUsers(List<String>edited,List<String>all,String? id)async{
+    List<String> newList = edited.where((item) => !all.contains(item)).toList();
+    List<String> missingList = all.where((item) => !edited.contains(item)).toList();
+    debugPrint("hiiiiiiiiiiiiiiii$edited");
+    debugPrint("byee$all");
+    debugPrint("hazawdhom $newList");
+    debugPrint("hashelhom $missingList");
+
+    try{
+      for(String rem in missingList){
+        debugPrint(rem);
+        QuerySnapshot querySnapshot=await _db.collection('users').where(
+            'name',isEqualTo:rem).limit(1).get();
+        DocumentSnapshot? documentSnapshot=querySnapshot.docs.first;
+        final String userId=documentSnapshot.id;
+        await _db.collection('users').doc(userId).update({'projects': FieldValue.arrayRemove([id])});
+        await _db.collection('projects').doc(id).update({'users':FieldValue.arrayRemove([rem])});
+
+      }
+      for(String add in newList){
+        QuerySnapshot querySnapshot=await _db.collection('users').where(
+            'name',isEqualTo:add).limit(1).get();
+        DocumentSnapshot? documentSnapshot=querySnapshot.docs.first;
+        final String userId=documentSnapshot.id;
+        await _db.collection('users').doc(userId).update({'projects': FieldValue.arrayUnion([id])});
+        await _db.collection('projects').doc(id).update({'users':FieldValue.arrayUnion([add])});
+
+      }
+    }
+    catch(e){
+      debugPrint("error in editing contr");
+      throw Exception("d");
+    }
+  }
+  Future<void> deleteDocument(String ? id)async{
+     try{
+       DocumentSnapshot project=await _db.collection('projects').doc(id).get();
+       List<String> users=List<String>.from(project.get('users'));
+       List<String> notes=List<String>.from(project.get('notes'));
+       try{
+         for(String user in users){
+           QuerySnapshot querySnapshot=await _db.collection('users').where(
+               'name',isEqualTo:user).limit(1).get();
+           DocumentSnapshot? documentSnapshot=querySnapshot.docs.first;
+           final String userId=documentSnapshot.id;
+           await _db.collection('users').doc(userId).update({'projects': FieldValue.arrayRemove([id])});
+         }
+         try{
+           await _db.collection('projects').doc(id).delete();
+           try{
+             for(String note in notes){
+               await _db.collection('notes').doc(note).delete();
+             }
+           }
+           catch(e){
+             throw Exception("Could not remove notes");
+           }
+         }
+         catch(e){
+           throw Exception("could not delete project itself");
+         }
+
+       }
+       catch(e){
+         throw Exception("Couldnt remove project from users");
+       }
+     }
+     catch(e){
+       throw Exception("couldnt get users");
+     }
+  }
 }
