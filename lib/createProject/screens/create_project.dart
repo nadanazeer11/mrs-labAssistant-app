@@ -22,6 +22,7 @@ class _Create_ProjectState extends State<Create_Project> {
   CreatePController contr=CreatePController();
   bool _allFieldsEntered = false;
   String? _error;
+  bool loading=false;
   List<String> _selectedItems=[];
   String loggedInName="";
   void _checkFieldsEntered() {
@@ -30,8 +31,9 @@ class _Create_ProjectState extends State<Create_Project> {
     bool m=        _selectedItems.isNotEmpty;
     debugPrint("Hello, my name is $x and I am $y $m years old.");
     if (_projectDescripController.text.isNotEmpty &&
-        _projectNameController.text.isNotEmpty &&
-        _selectedItems.isNotEmpty
+        _projectNameController.text.isNotEmpty
+        //&& _selectedItems.isNotEmpty
+
     ) {
       setState(() {
         _allFieldsEntered = true;
@@ -96,17 +98,15 @@ class _Create_ProjectState extends State<Create_Project> {
   );
   List<String> items=[];
   void _showMultiSelect  ()async{
-
     List<String> res=await showDialog(context: context, builder:
         (BuildContext){
-      // return MultiSelect(items:items,);
       return MultiSelect(items: items, preSelectedItems: _selectedItems);
     });
-    if(items!=null){
+
       setState(() {
         _selectedItems=res;
       });
-    }
+
 
   }
   void submitProject()async{
@@ -119,14 +119,29 @@ class _Create_ProjectState extends State<Create_Project> {
         notes: [],
         creation: Timestamp.fromDate(DateTime.now()));
     try{
+      setState(() {
+        loading=true;
+      });
       await contr.createProject(project);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Project successfully created!'),
+          backgroundColor: Colors.green,
+        ),
+      );
       setState(() {
         _error="";
+        _selectedItems=[];
+        loading=false;
       });
+      _projectNameController.clear();
+      _projectDescripController.clear();
+
     }
     catch(e){
       setState(() {
         _error="Cant create project,please try again";
+        loading=false;
       });
     }
   }
@@ -175,7 +190,7 @@ class _Create_ProjectState extends State<Create_Project> {
                       padding: const EdgeInsets.only(top: 15.0),
                       child: Text("${_error ?? ''}", style: TextStyle(color: Colors.redAccent)),
                     ),
-                ElevatedButton(onPressed:
+               loading==true?CircularProgressIndicator(): ElevatedButton(onPressed:
                     _allFieldsEntered? (){
                         submitProject();
                     }:(){

@@ -4,15 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mrs/models/Users.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 class Authenticate{
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore _db=FirebaseFirestore.instance;
   Future<bool> signupMethod(Userr user) async {
     UserCredential? userCredential;
     try {
-      userCredential =
-      await auth.createUserWithEmailAndPassword(
-          email: user.email, password: user.password);
+      final User? currentUser = auth.currentUser;
+      userCredential = await auth.createUserWithEmailAndPassword(email: user.email, password: user.password);
       await _db.collection('users').add({
         "email":user.email,
         "password":user.password,
@@ -22,6 +22,9 @@ class Authenticate{
         "createP":user.createP,
         "addU":user.addU
       });
+      // final User ?newUser = userCredential.user;
+      // await auth.signOut();
+
      return true;
     }
     catch(e) {

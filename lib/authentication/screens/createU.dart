@@ -57,7 +57,9 @@ class _CreateUState extends State<CreateU> {
               _loading=false;
             });
             try{
+              debugPrint("passed all tests");
               result=await authenticate.signupMethod(user);
+              debugPrint("passed but couldnt create");
               if(result){
                 setState(() {
                   _loading=false;
@@ -207,8 +209,8 @@ class _CreateUState extends State<CreateU> {
                       ),
                     ),
                   validator: (value){
-                      if(value!.isEmpty){
-                        return "Please Enter a password";
+                      if(value!.isEmpty || value.length<6){
+                        return "Password should be at least 6 characters";
                       }
                       return null;
                   },

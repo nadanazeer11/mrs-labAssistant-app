@@ -22,6 +22,8 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
  // PDFViewController controller;
   int pages = 0;
   int indexPage = 0;
+  bool isReady = false;
+  String errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +43,45 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
             Navigator.pop(context);
           },icon: Icon(Icons.arrow_back_ios),),
         ),
-        body: PDFView(
-          filePath: widget.file.path,
-          autoSpacing: true,
-          swipeHorizontal: true,
+        body:
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text("${name}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+              Expanded(
+                child: PDFView(
+                  filePath: widget.file.path,
+                  autoSpacing: true,
+                  swipeHorizontal: true,
+                  onRender: (_pages) {
+                    setState(() {
+                     // pages = _pages;
+                      isReady = true;
+                    });
+                  },
+                  onError: (error) {
+                    setState(() {
+                      errorMessage = error.toString();
+                    });
+                    print(error.toString());
+                  },
 
+                ),
+              ),
+            ],
+          ),
         ),
+        
+        // errorMessage.isEmpty
+        //     ? !isReady
+        //     ? Center(
+        //   child: CircularProgressIndicator(),
+        // )
+        //     : Container()
+        //     : Center(
+        //   child: Text(errorMessage),
+        // )
       ),
     );
   }

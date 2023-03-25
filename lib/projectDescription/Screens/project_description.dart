@@ -52,6 +52,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   bool switchPublic=false;
   String url="";
   bool sendButton=true;
+
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
     if(result==null) return "1234";
@@ -317,7 +318,11 @@ class _ProjDescripState extends State<ProjDescrip> {
                 );
 
               }
-              return Text("f");
+                return Center(
+                    child: Text(
+                      'Something went wrong',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                    ));
             }
           )
       ),
@@ -483,10 +488,13 @@ class _ProjDescripState extends State<ProjDescrip> {
                                     sendButton==true?TextButton(onPressed: ()async {
                                       setState(() {
                                         sendButton=false;
+
+
                                       });
                                       await sendNote(_notesText.text, context);
                                       setState(() {
                                         addMyComment=false;
+                                        _notesText.clear();
                                       });
                                       debugPrint("boolean $sendButton");
                                     }, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)):Container(),

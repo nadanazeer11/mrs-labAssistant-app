@@ -36,6 +36,7 @@ dependencies:
   path_provider: ^2.0.13
   permission_handler: ^10.2.0
   flutter_pdfview: ^1.2.9
+  firebase_auth_rest: ^2.0.3
 
 
 dev_dependencies:
