@@ -23,6 +23,7 @@ class _CreateUState extends State<CreateU> {
   bool _loading=false;
   bool emailTaken=false;
   bool userNameTaken=false;
+  bool inventoryM=false;
   void _submitSignUp()async{
     debugPrint("f");
     final isValid=_formU.currentState!.validate();
@@ -30,7 +31,11 @@ class _CreateUState extends State<CreateU> {
       bool username;
       bool email;
       bool result;
-      Userr user=new Userr(name:_usernameController.text,email: _emailController.text,password:_passwordController.text,projects: [],tasks: [],createP:CreateP,addU:CreateU);
+      Userr user=new Userr(name:_usernameController.text,
+          email: _emailController.text,
+          password:_passwordController.text,
+          projects: [],tasks: [],createP:CreateP,
+          addU:CreateU,inventoryM: inventoryM);
       try{
         debugPrint("in try");
         setState(() {
@@ -237,6 +242,16 @@ class _CreateUState extends State<CreateU> {
                   value: CreateU,
                   activeColor: AppColorss.darkmainColor,
                 ),
+                SwitchListTile(
+                  title:const Text("Manage Inventory",style: TextStyle(fontSize: 20,color: Color.fromRGBO(62, 68, 71, 1)),),
+                  onChanged: (bool value){
+                    setState(() {
+                      inventoryM=value;
+                    });},
+                  value: inventoryM,
+                  activeColor: AppColorss.darkmainColor,
+                ),
+                const SizedBox(height: 10,),
                 _loading ? Container(child: Center(child: CircularProgressIndicator(),),):
                 ElevatedButton(onPressed: (){
                   _submitSignUp();

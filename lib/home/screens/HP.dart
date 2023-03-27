@@ -110,6 +110,7 @@ class _HPState extends State<HP> {
   }
   bool ?createP;
   bool ?createU;
+  bool ?inventoryM;
   String? loggedInId;
   static final List <Widget> widgetOptions=<Widget>[
     OurProjects(),
@@ -140,6 +141,16 @@ class _HPState extends State<HP> {
         child: Column(
           children: [
             widgetOptions[indexx],
+            ElevatedButton(onPressed: ()async{
+              final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+              List<User> userList = [];
+
+              if (firebaseAuth.currentUser != null) {
+                userList.add(firebaseAuth.currentUser!);
+              }
+
+              await Future.wait(userList.map((user) => firebaseAuth.signOut()));
+            }, child: Text("Sign out all"))
           ],
         ),
       ),
@@ -155,17 +166,13 @@ class _HPState extends State<HP> {
       items: [
         BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_home_regular),
           activeIcon: Icon(FluentSystemIcons.ic_fluent_home_filled),label: "home",),
-        BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_search_regular),
-            activeIcon: Icon(FluentSystemIcons.ic_fluent_search_filled),label: "search"),
-        BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_ticket_regular),
-            activeIcon: Icon(FluentSystemIcons.ic_fluent_ticket_filled),label: "ticket"),
-        BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_person_regular),
-            activeIcon: Icon(FluentSystemIcons.ic_fluent_person_filled),label: "person")
+
       ],
     ),
       drawer: Drawer(
         child:  Column(
           children: [
+            Text("id ${loggedInId}"),
             Expanded(
               child: Container(
                 color: AppColorss.darkmainColor,
@@ -435,10 +442,17 @@ class _HPState extends State<HP> {
     _loadData();
 
   }
+  void dispose() {
+    // cancel any async operations here
+    super.dispose();
+  }
   void _loadData()async{
+   // await hmc.updateIsLate();
     await _getLoggedInId();
     await _createP();
     await _createU();
+    await _inventoryM();
+
   }
   Future<void> _getLoggedInId() async{
     try {
@@ -483,6 +497,23 @@ class _HPState extends State<HP> {
         createU=x;
       });
       debugPrint("f$createU");
+    }
+    catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred.Please try again!s'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+  Future<void> _inventoryM()async{
+    try{
+      bool x=await hmc.isInventoryM(loggedInId);
+      setState(() {
+        inventoryM=x;
+      });
+      debugPrint("inventoryM $inventoryM");
     }
     catch(e){
       ScaffoldMessenger.of(context).showSnackBar(

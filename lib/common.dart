@@ -35,3 +35,29 @@ Future<String>getIdofUser() async{
   }
 
 }
+Future<String> getPassword()async{
+  try{
+    User? user=FirebaseAuth.instance.currentUser;
+    debugPrint(user?.email);
+    QuerySnapshot querySnapshot=await _db.collection('users').where(
+        'email',isEqualTo: user?.email).limit(1).get();
+    DocumentSnapshot? documentSnapshot=querySnapshot.docs.first;
+    return documentSnapshot.get('password');
+  }
+  catch(e){
+    throw Exception("d");
+  }
+}
+Future<String> getemail()async{
+  try{
+    User? user=FirebaseAuth.instance.currentUser;
+    debugPrint(user?.email);
+    QuerySnapshot querySnapshot=await _db.collection('users').where(
+        'email',isEqualTo: user?.email).limit(1).get();
+    DocumentSnapshot? documentSnapshot=querySnapshot.docs.first;
+    return documentSnapshot.get('email');
+  }
+  catch(e){
+    throw Exception("d");
+  }
+}

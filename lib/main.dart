@@ -8,6 +8,7 @@ import 'package:mrs/home/screens/HP.dart';
 import 'package:mrs/projectDescription/Screens/fileScreen.dart';
 import 'package:mrs/projectDescription/Screens/imgScree.dart';
 import 'package:mrs/projectDescription/Screens/project_description.dart';
+import 'package:mrs/splash_screen.dart';
 import 'package:mrs/user_state.dart';
 
 import 'authentication/screens/login.dart';
@@ -32,7 +33,9 @@ class MyApp extends StatelessWidget {
       ),
     //  home:Login(),
       routes:{
-        '/':(context)=>  UserState(),
+
+        '/':(context)=>SplashScreen(),
+        '/userState':(context)=>  UserState(),
         '/signUp':(context)=>const SignupScreen(),
         '/forgetPassword':(context)=>ForgetPassword(),
         '/home':(context)=>HP(),

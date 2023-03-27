@@ -142,6 +142,21 @@ class HomeContr{
       throw Exception("");
     }
   }
+  Future<bool> isInventoryM(String ? uid) async{
+    try{
+      debugPrint("my uid $uid");
+      DocumentSnapshot x=await _db.collection('users').doc(uid).get();
+      if(x.exists){
+        return x.get('inventoryM');
+      }
+      else{
+        return false;
+      }
+    }
+    catch(e){
+      throw Exception("");
+    }
+  }
   Future<List<String>> getProjUsers(String ? id)async{
     try{
       DocumentSnapshot snapshot=await _db.collection('projects').doc(id).get();
@@ -244,6 +259,37 @@ class HomeContr{
      }
      catch(e){
        throw Exception("couldnt get users");
+     }
+  }
+  Future<void> updateIsLate() async{
+     final now=DateTime.now();
+     try {
+       debugPrint("update isLate");
+       // QuerySnapshot q = await _db.collection('projects')
+       //     .where('endDate', isLessThanOrEqualTo: Timestamp.fromDate(now)).get();
+       //     // .where('isDone', isEqualTo: false)
+       //     // .get();
+       QuerySnapshot q1 = await FirebaseFirestore.instance
+           .collection('projects')
+           .where('endDate', isLessThan: Timestamp.fromDate(now))
+           .get();
+
+       QuerySnapshot q2 = await FirebaseFirestore.instance
+           .collection('projects')
+           .where('isDone', isEqualTo: false)
+           .get();
+
+       List<DocumentSnapshot> docs = q1.docs.where((doc) =>
+           q2.docs.any((doc2) => doc2.id == doc.id)).toList();
+       debugPrint("length ${docs.length}");
+       for(var x in docs){
+           await _db.collection('projects').doc(x.id).update({
+             'isLate': true,
+           });
+       }
+     }
+     catch(e){
+
      }
   }
 }

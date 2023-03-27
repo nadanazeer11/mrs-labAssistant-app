@@ -210,6 +210,7 @@ class _OurProjectsState extends State<OurProjects> {
   void initState() {
     _getLoggedInName();
     _getLoggedInId();
+    // homeC.updateIsLate();
   }
   void _getLoggedInName()async{
     try {

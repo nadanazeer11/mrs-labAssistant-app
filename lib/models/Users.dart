@@ -6,6 +6,7 @@ class Userr {
   final List<String> tasks;
   final bool createP;
   final bool addU;
+  final bool inventoryM;
 
   Userr(
       { required this.name,
@@ -14,7 +15,8 @@ class Userr {
         required this.projects,
         required this.tasks,
         required this.createP,
-        required this.addU
+        required this.addU,
+        required this.inventoryM
       });
 
 }

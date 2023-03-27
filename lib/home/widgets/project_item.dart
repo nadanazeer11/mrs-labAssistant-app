@@ -222,12 +222,15 @@ class _Project_itemState extends State<Project_item> {
 
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred.Please try again!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
     }
   }
 
