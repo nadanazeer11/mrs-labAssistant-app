@@ -7,6 +7,7 @@ import 'package:mrs/authentication/backend/authenticate.dart';
 import 'package:mrs/config/colors.dart';
 import 'package:mrs/home/backend/Home_Controller.dart';
 import 'package:mrs/home/screens/OurProjects.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 import '../../common.dart';
 import '../../config/text_styles.dart';
@@ -21,6 +22,8 @@ class HP extends StatefulWidget {
 }
 
 class _HPState extends State<HP> {
+  int _page = 0;
+  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   String ?errorPass;
   bool wrongpass=false;
   HomeContr hmc=new HomeContr();
@@ -154,22 +157,23 @@ class _HPState extends State<HP> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      onTap: onItemTapped,
-      currentIndex: indexx,
-      elevation:10,
-      selectedItemColor: Colors.blueGrey,
-      unselectedItemColor: const Color(0xFF526480),
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      items: [
-        BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_home_regular),
-          activeIcon: Icon(FluentSystemIcons.ic_fluent_home_filled),label: "home",),
+    //   bottomNavigationBar: BottomNavigationBar(
+    //   type: BottomNavigationBarType.fixed,
+    //   onTap: onItemTapped,
+    //   currentIndex: indexx,
+    //   elevation:10,
+    //   selectedItemColor: Colors.blueGrey,
+    //   unselectedItemColor: const Color(0xFF526480),
+    //   showSelectedLabels: false,
+    //   showUnselectedLabels: false,
+    //   items: [
+    //     BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_home_regular),
+    //       activeIcon: Icon(FluentSystemIcons.ic_fluent_home_filled),label: "home",),
+    //
+    //   ],
+    // ),
 
-      ],
-    ),
-      drawer: Drawer(
+        drawer: Drawer(
         child:  Column(
           children: [
             Text("id ${loggedInId}"),
