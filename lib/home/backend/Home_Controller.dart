@@ -69,6 +69,7 @@ class HomeContr{
       throw Exception("");
     }
   }
+
   Stream<List<Project>> getProjects() {
     return _db.collection('projects').orderBy('creation', descending: true).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {

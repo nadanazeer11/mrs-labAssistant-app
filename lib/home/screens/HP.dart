@@ -10,8 +10,9 @@ import 'package:mrs/home/screens/OurProjects.dart';
 
 import '../../common.dart';
 import '../../config/text_styles.dart';
-import '../widgets/project_item.dart';
-import 'YourProjects.dart';
+import '../../inventory/backend/inventContr.dart';
+import '../../inventory/screens/inventory5.dart';
+
 
 class HP extends StatefulWidget {
   const HP({Key? key}) : super(key: key);
@@ -27,6 +28,7 @@ class _HPState extends State<HP> {
   var _oldPassContr=TextEditingController();
   var _newPassContr=TextEditingController();
   Authenticate authenticate=Authenticate();
+  InventContr invC=InventContr();
   final changeP=GlobalKey<FormState>();
   Future<bool> _submitChangeP()async{
     final isValid=changeP.currentState!.validate();
@@ -76,7 +78,7 @@ class _HPState extends State<HP> {
           return false;
         }
         else{
-          debugPrint("no erro");
+
           setState(() {
             errorPass=null;
           });
@@ -114,16 +116,18 @@ class _HPState extends State<HP> {
   String? loggedInId;
   static final List <Widget> widgetOptions=<Widget>[
     OurProjects(),
+    Inventory5()
   ];
   int indexx=0;
   void onItemTapped(int index){
     setState((){
       indexx=index;
+      debugPrint("the index$index");
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     return
       Scaffold(
       appBar:
@@ -138,22 +142,18 @@ class _HPState extends State<HP> {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            widgetOptions[indexx],
-            ElevatedButton(onPressed: ()async{
-              final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-              List<User> userList = [];
-
-              if (firebaseAuth.currentUser != null) {
-                userList.add(firebaseAuth.currentUser!);
-              }
-
-              await Future.wait(userList.map((user) => firebaseAuth.signOut()));
-            }, child: Text("Sign out all"))
-          ],
-        ),
+        child: widgetOptions[indexx],
       ),
+      floatingActionButton:inventoryM==true&& indexx==1? FloatingActionButton.extended(onPressed: () {
+        Navigator.pushNamed(context, '/addItem');
+      },
+        elevation: 10,
+        hoverElevation: 20,
+        backgroundColor: AppColorss.lightmainColor,
+        label:Text("Add"),
+        icon: Icon(Icons.add,color: Colors.white,),
+
+      ):null,
       bottomNavigationBar: BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       onTap: onItemTapped,
@@ -166,10 +166,12 @@ class _HPState extends State<HP> {
       items: [
         BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_home_regular),
           activeIcon: Icon(FluentSystemIcons.ic_fluent_home_filled),label: "home",),
+        BottomNavigationBarItem(icon: Icon(FluentSystemIcons.ic_fluent_toolbox_regular),
+          activeIcon: Icon(FluentSystemIcons.ic_fluent_toolbox_filled),label: "tools",),
 
       ],
     ),
-      drawer: Drawer(
+     drawer: Drawer(
         child:  Column(
           children: [
             Text("id ${loggedInId}"),
@@ -465,12 +467,12 @@ class _HPState extends State<HP> {
 
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!s'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('An error occurred.Please try again!s'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
   }
   Future<void> _createP()async{
@@ -482,12 +484,12 @@ class _HPState extends State<HP> {
       debugPrint("f$createP");
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!s'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('An error occurred.Please try again!s'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
   }
   Future<void> _createU()async{
@@ -499,12 +501,12 @@ class _HPState extends State<HP> {
       debugPrint("f$createU");
     }
     catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred.Please try again!s'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('An error occurred.Please try again!s'),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
   }
   Future<void> _inventoryM()async{
