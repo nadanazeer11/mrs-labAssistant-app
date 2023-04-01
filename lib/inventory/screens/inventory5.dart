@@ -171,33 +171,30 @@ class _Inventory5State extends State<Inventory5>{
                   child: Column(
                     children: [
                       Row(children: [
-                        Text("Inventory",style: TextStyle(fontSize: 28,color: Colors.black,fontWeight: FontWeight.bold),),
+                        const Text("Inventory",style: TextStyle(fontSize: 28,color: Colors.black,fontWeight: FontWeight.bold),),
                         PopupMenuButton(
                           icon: Icon(Icons.filter_alt_rounded,color: AppColorss.darkmainColor,),
                           itemBuilder: (BuildContext context)=>[
-                            PopupMenuItem(
-                              child: Text('My Projects'),
-                              value: "Me",
+                            const PopupMenuItem(
+                              value: "Available",
+                              child: Text('Available'),
                             ),
-                            PopupMenuItem(
-                              child: Text("Late Projects"),
-                              value: "Late",
+                            const PopupMenuItem(
+                              value: "Borrowed",
+                              child: Text("Borrowed"),
                             ),
-                            PopupMenuItem(
-                              child: Text('Upcoming Projects'),
-                              value: "Upcoming",
+                            const PopupMenuItem(
+                              value: "Dead",
+                              child: Text('Dead'),
                             ),
-                            PopupMenuItem(
-                              child: Text('Done Projects'),
-                              value: "Done",
-                            ),
+
                           ],
                           // color: Colors.black,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           onSelected: (value) {
-                            debugPrint('your p${value}');
+                            debugPrint('your p$value');
                             setState(() {
                               filter=value;
                             });
@@ -209,32 +206,37 @@ class _Inventory5State extends State<Inventory5>{
                             setState(() {
                               filter=null;
                             });
-                          }, icon: Icon(Icons.clear))
-                        ]):Container()
+                          }, icon: const Icon(Icons.clear))
+                        ]):Container(),
+                        Expanded(
+                          child: Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(onPressed: (){}, icon: Icon(Icons.summarize_outlined))),
+                        ),
                       ],),
                       TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search using id...',
+                          hintText: 'Search using id/name...',
                           prefixIcon:searchWord==null? IconButton(onPressed: (){
                             setState(() {
                               searchWord=searchController.text;
                             });
-                          },icon: Icon(Icons.search),): IconButton(onPressed: (){
+                          },icon: const Icon(Icons.search),): IconButton(onPressed: (){
                             setState(() {
                               searchWord=null;
                               searchController.clear();
                             });
-                          },icon: Icon(Icons. clear),),
+                          },icon: const Icon(Icons. clear),),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          contentPadding: EdgeInsets.all(8),
+                          contentPadding: const EdgeInsets.all(8),
                         ),
                       ),
-                      SizedBox(height: 15,),
+                      const SizedBox(height: 15,),
                       ScrollableWidget(child: buildDataTable(invent)),
 
 
@@ -243,7 +245,7 @@ class _Inventory5State extends State<Inventory5>{
                 ),
               );
             }
-            return Center(
+            return const Center(
                 child: Text(
                   'Something went wrong',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
@@ -252,7 +254,7 @@ class _Inventory5State extends State<Inventory5>{
 
     }
     else{
-      return Center(child: CircularProgressIndicator(),);
+      return const Center(child: CircularProgressIndicator(),);
     }
 
   }
@@ -278,15 +280,44 @@ class _Inventory5State extends State<Inventory5>{
 
 
   List<DataRow> getInventoryRows(List<Inventory>? inventory) {
-    if(filter==null && searchWord==null){
-      return inventory?.map((data) =>_buildDataRow(data)).toList() ?? [];
-    }
-    if(searchWord!=null){
       String x=searchWord??"a";
-      return inventory?.where((data) => data.itemId.startsWith(x)).map((data) =>
-          _buildDataRow(data)).toList() ?? [];
-    }
-    return inventory?.map((data) =>_buildDataRow(data)).toList() ?? [];
+      String filters=filter??"all";
+      bool searchNotEmpty=searchWord?.isNotEmpty ?? false;
+      bool filterNotEmpty=filter?.isNotEmpty?? false;
+      return inventory?.where((data) {
+        if (searchWord != null && searchNotEmpty) {
+          if (data.itemName.toLowerCase().contains(x.trim().toLowerCase())||data.itemId.trim().startsWith(x)) {
+            if(filter!=null && filterNotEmpty){
+              if (data.status == filter) {
+                return true;
+              }else{return false;}
+            }else{return true;}
+          }else{return false;}
+        }
+        if (filter!=null && filterNotEmpty) {
+          if (data.status == filter) {
+            if(searchWord != null && searchNotEmpty){
+              if (data.itemName.toLowerCase().contains(x.trim().toLowerCase())) {
+                return true;
+              }
+              else{
+                return false;
+              }
+            }
+            else{
+              return true;
+            }
+          }
+          else{
+            return false;
+          }
+        }
+
+        return true;
+      }).map((data) => _buildDataRow(data)).toList() ?? [];
+
+
+
 
   }
   DataRow _buildDataRow(Inventory data) {

@@ -193,7 +193,7 @@ class _AddItemState extends State<AddItem> {
   List<DataRow> getRows(){
   if(searchWord!=null){
     String x=searchWord??"a";
-    return allItems?.where((data) => data.startsWith(x)).map((data) =>
+    return allItems?.where((data) => data.contains(x)).map((data) =>
         _buildDataRow(data)).toList() ?? [];
   }
   else{
@@ -228,7 +228,7 @@ class _AddItemState extends State<AddItem> {
         await invC.addItem(inv);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project successfully created!'),
+            content: Text('Item successfully created!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -239,7 +239,7 @@ class _AddItemState extends State<AddItem> {
       catch(e){
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error Creating project,try again!'),
+            content: Text('Error Creating item,try again!'),
             backgroundColor: Colors.red,
           ),
         );
@@ -256,7 +256,7 @@ class _AddItemState extends State<AddItem> {
        await invC.addItem(inv);
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(
-           content: Text('Project successfully created!'),
+           content: Text('Item successfully created!'),
            backgroundColor: Colors.green,
          ),
        );
@@ -267,7 +267,7 @@ class _AddItemState extends State<AddItem> {
      catch(e){
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(
-           content: Text('Error Creating project,try again!'),
+           content: Text('Error adding item,try again!'),
            backgroundColor: Colors.red,
          ),
        );

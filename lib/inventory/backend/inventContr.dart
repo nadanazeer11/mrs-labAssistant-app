@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mrs/models/InventoryItems.dart';
 
 import 'package:mrs/models/Users.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -78,6 +79,41 @@ class InventContr{
     }
     catch(e){
       throw Exception("rrr");
+    }
+  }
+  Future<List<InventorySummary>> getSummary()async{
+    try{
+      QuerySnapshot all=await _db.collection("inventory").get();
+      List<String> names=[];
+      List<InventorySummary> invList=[];
+
+      for(var doc in all.docs){
+        String itemName=doc.get("itemName");
+        String status=doc.get("status");
+        if(names.contains(itemName)){
+          if(status=="Available"){
+            invList.firstWhere((element) => element.itemName==itemName).availableCount+=1;
+          }
+          if(status=="Dead"){
+            invList.firstWhere((element) => element.itemName==itemName).deadCount+=1;
+          }
+          if(status=="Borrowed"){
+            invList.firstWhere((element) => element.itemName==itemName).borrowedCount+=1;
+          }
+
+        }
+        else{
+          names.add(itemName);
+          InventorySummary inv=InventorySummary(itemName: itemName,
+              borrowedCount:status=="Borrowed"?1:0, availableCount: status=="Available"?1:0, deadCount: status=="Dead"?1:0);
+          invList.add(inv);
+        }
+
+      }
+      return invList;
+    }
+    catch(e){
+      throw Exception("f");
     }
   }
 
