@@ -3,12 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Inventory{
   String itemId;
   String itemName;
-  String status;
   Timestamp creationDate;
   String createdBy;
-  String borrowedUser;
-  String borrowedFrom;
-  Timestamp borrowedDate;
+
+  String status;
+  String borrowedUser; //only in case of borrow else " "
+  String borrowedFrom; //in case of borrow or death administered by who
+  String borrowedDate;
 
   Inventory(
       {

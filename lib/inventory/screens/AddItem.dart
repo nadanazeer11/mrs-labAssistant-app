@@ -224,7 +224,8 @@ class _AddItemState extends State<AddItem> {
     final isValid=_formU.currentState!.validate();
     if(isValid){
       try{
-        Inventory inv=Inventory(itemId:id.toLowerCase().trim(), itemName: name.toLowerCase().trim(), status:"Available", createdBy:loggedInName?? "Omar", borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "", borrowedDate: Timestamp.fromDate(DateTime.now()));
+        Inventory inv=Inventory(itemId:id.toLowerCase().trim(), itemName: name.toLowerCase().trim(), status:"Available", createdBy:loggedInName?? "Omar", borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "",
+            borrowedDate: "");
         await invC.addItem(inv);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -252,7 +253,9 @@ class _AddItemState extends State<AddItem> {
    debugPrint("pop up $isValid");
    if(isValid){
      try{
-       Inventory inv=Inventory(itemId:id, itemName: name, status:"Available", createdBy:loggedInName?? "Omar", borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "", borrowedDate: Timestamp.fromDate(DateTime.now()));
+       Inventory inv=Inventory(itemId:id, itemName: name, status:"Available", createdBy:loggedInName?? "Omar",
+           borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "",
+           borrowedDate:"");
        await invC.addItem(inv);
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(

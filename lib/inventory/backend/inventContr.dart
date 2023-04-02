@@ -91,13 +91,15 @@ class InventContr{
         String itemName=doc.get("itemName");
         String status=doc.get("status");
         if(names.contains(itemName)){
+          invList.firstWhere((element) => element.itemName==itemName).quantity+=1;
           if(status=="Available"){
             invList.firstWhere((element) => element.itemName==itemName).availableCount+=1;
           }
-          if(status=="Dead"){
+          else if(status=="Dead"){
             invList.firstWhere((element) => element.itemName==itemName).deadCount+=1;
+
           }
-          if(status=="Borrowed"){
+          else if(status=="Borrowed"){
             invList.firstWhere((element) => element.itemName==itemName).borrowedCount+=1;
           }
 
@@ -105,7 +107,7 @@ class InventContr{
         else{
           names.add(itemName);
           InventorySummary inv=InventorySummary(itemName: itemName,
-              borrowedCount:status=="Borrowed"?1:0, availableCount: status=="Available"?1:0, deadCount: status=="Dead"?1:0);
+              borrowedCount:status=="Borrowed"?1:0, availableCount: status=="Available"?1:0, deadCount: status=="Dead"?1:0, quantity:1);
           invList.add(inv);
         }
 
@@ -114,6 +116,26 @@ class InventContr{
     }
     catch(e){
       throw Exception("f");
+    }
+  }
+  Future<void> changeStatus(String id,String status,String admin,Timestamp date,String user)async{
+    try{
+      final QuerySnapshot snapshot = await _db.collection('inventory')
+          .where('itemId', isEqualTo: id)
+          .get();
+      final DocumentSnapshot userDoc = snapshot.docs.first;
+      final String userId = userDoc.id;
+      await FirebaseFirestore.instance.collection('inventory').doc(userId).update(
+          {
+            'status':status,
+            'borrowedDate':status=="Available"? "": date,
+            'borrowedUser':status=="Borrowed"? user:"",
+
+
+          });
+    }
+    catch(e){
+
     }
   }
 
