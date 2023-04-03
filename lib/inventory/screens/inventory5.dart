@@ -176,6 +176,7 @@ class _Inventory5State extends State<Inventory5> {
             if (snapshot.hasData) {
               debugPrint("i have dataaaaaaaaa");
               List<Inventory> ?invent = snapshot.data;
+              debugPrint("${snapshot.data}");
               return Container(
                 color: Colors.white,
                 child: Padding(
@@ -357,44 +358,6 @@ class _Inventory5State extends State<Inventory5> {
       cells: <DataCell>[
         DataCell(Row(
           children: [
-            PopupMenuButton(
-              itemBuilder: (BuildContext context) =>
-              [
-                PopupMenuItem(
-                  child:
-                  Row(
-                    children: [
-                      Icon(Icons.remove_done),
-                      Text("Mark as Undone"),
-                    ],
-                  ),
-                  value: 1,
-                ),
-                PopupMenuItem(
-                  child:
-                  Row(
-                    children: [
-                      Icon(Icons.remove_done),
-                      Text("Mark as Undone"),
-                    ],
-                  ),
-                  value: 1,
-                ),
-                PopupMenuItem(
-                  child:
-                  Row(
-                    children: [
-                      Icon(Icons.remove_done),
-                      Text("Mark as Undone"),
-                    ],
-                  ),
-                  value: 1,
-                ),
-              ],
-              onSelected: (value) {
-
-              },
-            ),
             Text(data.itemId),
           ],
         )),
@@ -405,20 +368,20 @@ class _Inventory5State extends State<Inventory5> {
             if (data.status == "Borrowed" || data.status == "Dead") {
               String type = data.status == "Borrowed" ? "Borrowed" : "Dead";
               String borrowedBy = data.borrowedUser;
-              String borrowedFrom = data.borrowedFrom;
-              String borrowedDate = DateFormat.yMd().format(
-                  data.creationDate.toDate());
-              String itemName = data.itemName + " " + "#" + data.itemId;
+              String administeredBy = data.administeredBy;
+              String borrowDeathDate =data.borrowDeathDate;
+              String deathReason=data.deathReason;
+              String itemName = "${data.itemName} #${data.itemId}";
               showDialog(
                 context: context,
                 builder: (context) =>
                     buildAlertDialog(
-                        context, borrowedBy, borrowedFrom, type, itemName,
-                        borrowedDate),
+                        context, borrowedBy, administeredBy, type, itemName,
+                        borrowDeathDate,deathReason),
               );
             }
             else if (data.status == "Available") {
-              String itemName = data.itemName + " " + "#" + data.itemId;
+              String itemName = "${data.itemName} #${data.itemId}";
               showDialog(
                 context: context,
                 builder: (context) =>
@@ -450,8 +413,8 @@ class _Inventory5State extends State<Inventory5> {
     );
   }
 
-  AlertDialog buildAlertDialog(BuildContext context, String actionuser,
-      String actionAdmin, String type, String itemName, String userDate) {
+  AlertDialog buildAlertDialog(BuildContext context, String borrowedBy,
+      String administeredBy, String type, String itemName, String userDate,String deathReason) {
     return AlertDialog(
       backgroundColor: Colors.white,
       titlePadding: EdgeInsets.zero,
@@ -479,7 +442,7 @@ class _Inventory5State extends State<Inventory5> {
                         color: Colors.black),
                     children: <TextSpan>[
                       TextSpan(text: " "),
-                      TextSpan(text: actionuser,
+                      TextSpan(text: borrowedBy,
                           style: TextStyle(fontWeight: FontWeight.w400,
                               color: AppColorss.darkFontGrey)),
                     ],
@@ -495,7 +458,7 @@ class _Inventory5State extends State<Inventory5> {
                     color: Colors.black),
                 ),
                 Expanded(
-                  child: Text(actionuser, style: TextStyle(
+                  child: Text(deathReason, style: TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 22,
                       color: AppColorss.darkFontGrey),
@@ -509,12 +472,12 @@ class _Inventory5State extends State<Inventory5> {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      text: 'Administered By: ',
+                      text: 'Authorized: ',
                       style: TextStyle(fontWeight: FontWeight.w400,
                           fontSize: 24,
                           color: Colors.black),
                       children: <TextSpan>[
-                        TextSpan(text: actionAdmin, style: TextStyle(
+                        TextSpan(text: administeredBy, style: TextStyle(
                             fontWeight: FontWeight.w400,
                             color: AppColorss.darkFontGrey)),
                       ],
@@ -530,19 +493,11 @@ class _Inventory5State extends State<Inventory5> {
                     size: 24),
                 SizedBox(width: 14,),
                 Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      text: '',
-                      style: TextStyle(fontWeight: FontWeight.w400,
-                          fontSize: 24,
-                          color: Colors.black),
-                      children: <TextSpan>[
-                        TextSpan(text: userDate, style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: AppColorss.darkFontGrey)),
-                      ],
-                    ),
-                  ),
+                  child:Text(userDate, style: TextStyle(
+                    fontSize: 22,
+
+                      fontWeight: FontWeight.w400,
+                      color: AppColorss.darkFontGrey))
                 )
               ],
             ),

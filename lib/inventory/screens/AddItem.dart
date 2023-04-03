@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:mrs/models/Inventory.dart';
-
+import 'package:intl/intl.dart';
 import '../../common.dart';
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
@@ -28,6 +30,7 @@ class _AddItemState extends State<AddItem> {
  String ? loggedInName;
  var _nameController2=TextEditingController();
  var _idController2=TextEditingController();
+ bool popUpLoading=false;
 
  @override
   Widget build(BuildContext context) {
@@ -143,6 +146,9 @@ class _AddItemState extends State<AddItem> {
                                       borderSide: BorderSide(color:Color(0xFF005466))
                                   ),
                                 ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                                ],
                                 validator:(value) {
                                   if (value!.trim().isEmpty) {
                                     return "Please enter an id";
@@ -224,27 +230,81 @@ class _AddItemState extends State<AddItem> {
     final isValid=_formU.currentState!.validate();
     if(isValid){
       try{
-        Inventory inv=Inventory(itemId:id.toLowerCase().trim(), itemName: name.toLowerCase().trim(), status:"Available", createdBy:loggedInName?? "Omar", borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "",
-            borrowedDate: "");
-        await invC.addItem(inv);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Item successfully created!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _idController.clear();
-        _nameController.clear();
-        await _getData();
+        bool x=await invC.idUnique(id.toLowerCase().trim());
+        if(x){
+          showPlatformDialog(
+            context: context,
+            builder: (context) => BasicDialogAlert(
+              title: Text("Authentication Error"),
+              content:
+              Text("Id already exists"),
+              actions: <Widget>[
+                BasicDialogAction(
+                  title: Text("OK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+        else{
+          try{
+            DateTime now = DateTime.now();
+            String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
+
+            Inventory inv=Inventory(
+              itemId:id.toLowerCase().trim(),
+              itemName: name.toLowerCase().trim(),
+              status:"Available",
+              createdBy:loggedInName?? "Omar",
+              creationDate: Timestamp.fromDate(DateTime.now()),
+              administeredBy: "",
+              borrowedUser: "",
+              borrowDeathDate: formattedDate,
+              deathReason: "",
+            );
+            await invC.addItem(inv);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Item successfully created!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            _idController.clear();
+            _nameController.clear();
+            await _getData();
+          }
+          catch(e){
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error Creating item,try again!'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
       }
       catch(e){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error Creating item,try again!'),
-            backgroundColor: Colors.red,
+        showPlatformDialog(
+          context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text("Error Occured"),
+            content:
+            Text(e.toString()),
+            actions: <Widget>[
+              BasicDialogAction(
+                title: Text("OK"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
         );
       }
+
     }
 
   }
@@ -253,28 +313,77 @@ class _AddItemState extends State<AddItem> {
    debugPrint("pop up $isValid");
    if(isValid){
      try{
-       Inventory inv=Inventory(itemId:id, itemName: name, status:"Available", createdBy:loggedInName?? "Omar",
-           borrowedUser: "", creationDate: Timestamp.fromDate(DateTime.now()), borrowedFrom: "",
-           borrowedDate:"");
-       await invC.addItem(inv);
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           content: Text('Item successfully created!'),
-           backgroundColor: Colors.green,
-         ),
-       );
-       _idController2.clear();
-       _nameController2.clear();
-       await _getData();
+       bool x=await invC.idUnique(id.toLowerCase().trim());
+       if(x){
+         showPlatformDialog(
+           context: context,
+           builder: (context) => BasicDialogAlert(
+             title: Text("Authentication Error"),
+             content:
+             Text("Id already exists"),
+             actions: <Widget>[
+               BasicDialogAction(
+                 title: Text("OK"),
+                 onPressed: () {
+                   Navigator.pop(context);
+                 },
+               ),
+             ],
+           ),
+         );
+       }
+       else{
+         try{
+           Inventory inv=Inventory(
+             itemId:id.toLowerCase().trim(),
+             itemName: name.toLowerCase().trim(),
+             status:"Available", createdBy:loggedInName?? "Omar",
+             creationDate: Timestamp.fromDate(DateTime.now()),
+             administeredBy: "",
+             borrowedUser: "",
+             borrowDeathDate: "",
+             deathReason: "",);
+
+           await invC.addItem(inv);
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text('Item successfully created!'),
+               backgroundColor: Colors.green,
+             ),
+           );
+           _idController2.clear();
+           _nameController2.clear();
+           await _getData();
+         }
+         catch(e){
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text('Error adding item,try again!'),
+               backgroundColor: Colors.red,
+             ),
+           );
+         }
+       }
      }
      catch(e){
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           content: Text('Error adding item,try again!'),
-           backgroundColor: Colors.red,
+       showPlatformDialog(
+         context: context,
+         builder: (context) => BasicDialogAlert(
+           title: Text("Error Occured"),
+           content:
+           Text(e.toString()),
+           actions: <Widget>[
+             BasicDialogAction(
+               title: Text("OK"),
+               onPressed: () {
+                 Navigator.pop(context);
+               },
+             ),
+           ],
          ),
        );
      }
+
    }
 
  }
@@ -346,6 +455,9 @@ class _AddItemState extends State<AddItem> {
                   widthFactor: 0.8,
                   child: TextFormField(
                       controller: _idController2,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Id',
                         hintText: "Enter item's id",
@@ -365,6 +477,7 @@ class _AddItemState extends State<AddItem> {
                 ),
                 SizedBox(height:10,),
                 ElevatedButton(onPressed: (){
+                  popUpLoading=true;
                   _addItem2(_idController2.text.toLowerCase().trim(),itemName.toLowerCase().trim());
 
                 }, child:Text("Add",),   style: ElevatedButton.styleFrom(

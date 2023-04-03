@@ -8,8 +8,9 @@ class Inventory{
 
   String status;
   String borrowedUser; //only in case of borrow else " "
-  String borrowedFrom; //in case of borrow or death administered by who
-  String borrowedDate;
+  String administeredBy; //in case of borrow or death administered by who
+  String borrowDeathDate; //in case of death and borrow
+  String deathReason; //in case of death
 
   Inventory(
       {
@@ -19,8 +20,9 @@ class Inventory{
         required this.createdBy,
         required this.borrowedUser,
         required this.creationDate,
-        required this.borrowedFrom,
-        required this.borrowedDate
+        required this.administeredBy,
+        required this.borrowDeathDate,
+        required this.deathReason,
       });
   Map<String, dynamic> toMap() {
     return {
@@ -30,10 +32,9 @@ class Inventory{
       'creationDate': creationDate,
       'createdBy':createdBy,
       'borrowedUser':borrowedUser,
-      'borrowedDate':borrowedDate,
-      'borrowedFrom':borrowedFrom,
-
-
+      'borrowDeathDate':borrowDeathDate,
+      'administeredBy':administeredBy,
+      'deathReason':deathReason
     };
   }
 

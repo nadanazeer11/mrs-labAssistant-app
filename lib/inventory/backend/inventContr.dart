@@ -16,7 +16,6 @@ class InventContr{
     debugPrint("getInventoryLoose");
     return _db.collection('inventory').orderBy('creationDate', descending: true).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
-        debugPrint("el id ya basha beta3 el inventory${doc['borrowedDate']}");
         return Inventory(
             itemId: doc['itemId'],
             itemName: doc['itemName'],
@@ -24,8 +23,9 @@ class InventContr{
             createdBy: doc['createdBy'],
             borrowedUser: doc['borrowedUser'],
             creationDate: doc['creationDate'],
-            borrowedFrom: doc['borrowedFrom'],
-            borrowedDate: doc['borrowedDate']
+            administeredBy: doc['administeredBy'],
+            borrowDeathDate: doc['borrowDeathDate'],
+            deathReason: doc['deathReason']
         );
       }).toList();
     });
@@ -118,7 +118,7 @@ class InventContr{
       throw Exception("f");
     }
   }
-  Future<void> changeStatus(String id,String status,String admin,Timestamp date,String user)async{
+  Future<void> changeStatus(String id,String status,String admin,String date,String user,String deathReason)async{
     try{
       final QuerySnapshot snapshot = await _db.collection('inventory')
           .where('itemId', isEqualTo: id)
@@ -128,16 +128,29 @@ class InventContr{
       await FirebaseFirestore.instance.collection('inventory').doc(userId).update(
           {
             'status':status,
-            'borrowedDate':status=="Available"? "": date,
             'borrowedUser':status=="Borrowed"? user:"",
-
-
+            'administeredBy':status!="Available"? admin:"",
+            'borrowDeathDate':status!="Available"? date:"",
+            'deathReason':status=="Death"? deathReason:""
           });
     }
     catch(e){
-
+      throw Exception("f");
     }
   }
-
+  Future<bool> idUnique(String id)async{
+    try{
+      QuerySnapshot x=await _db.collection('inventory').get();
+      for(var doc in x.docs){
+        if(doc.get("itemId")==id){
+          return true;
+        }
+      }
+      return false;
+    }
+    catch(e){
+      throw Exception(e.toString());
+    }
+  }
 
 }
