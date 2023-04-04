@@ -120,18 +120,21 @@ class InventContr{
   }
   Future<void> changeStatus(String id,String status,String admin,String date,String user,String deathReason)async{
     try{
+      debugPrint("beware changing status of $id by $admin to $status with death Reason $deathReason");
       final QuerySnapshot snapshot = await _db.collection('inventory')
           .where('itemId', isEqualTo: id)
           .get();
       final DocumentSnapshot userDoc = snapshot.docs.first;
+      debugPrint("got the document ");
       final String userId = userDoc.id;
+      debugPrint("id of document im trying to change");
       await FirebaseFirestore.instance.collection('inventory').doc(userId).update(
           {
             'status':status,
             'borrowedUser':status=="Borrowed"? user:"",
             'administeredBy':status!="Available"? admin:"",
             'borrowDeathDate':status!="Available"? date:"",
-            'deathReason':status=="Death"? deathReason:""
+            'deathReason':status=="Dead"? deathReason:""
           });
     }
     catch(e){
@@ -152,5 +155,23 @@ class InventContr{
       throw Exception(e.toString());
     }
   }
-
+  Future<bool> userNameCheck(String name) async{
+    try{
+      final querySnapshot=await _db.collection('users').where('name',isEqualTo: name).get();
+      return querySnapshot.docs.isNotEmpty;
+    }
+    catch(e){
+      throw Exception('Error Checking if user exists');
+    }
+  }
+  Future<bool> checkReturnee(String username,String itemId)async{
+    try{
+      QuerySnapshot x= await _db.collection('inventory').where('itemId',isEqualTo: itemId).get();
+      DocumentSnapshot m=x.docs.first;
+      return m.get("borrowedUser")==username;
+    }
+    catch(e){
+      throw Exception("g");
+    }
+  }
 }

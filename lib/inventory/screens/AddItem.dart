@@ -251,8 +251,8 @@ class _AddItemState extends State<AddItem> {
         }
         else{
           try{
-            DateTime now = DateTime.now();
-            String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
+            // DateTime now = DateTime.now();
+            // String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
 
             Inventory inv=Inventory(
               itemId:id.toLowerCase().trim(),
@@ -262,7 +262,7 @@ class _AddItemState extends State<AddItem> {
               creationDate: Timestamp.fromDate(DateTime.now()),
               administeredBy: "",
               borrowedUser: "",
-              borrowDeathDate: formattedDate,
+              borrowDeathDate: "",
               deathReason: "",
             );
             await invC.addItem(inv);
