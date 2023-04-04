@@ -31,6 +31,8 @@ class _AddItemState extends State<AddItem> {
  var _nameController2=TextEditingController();
  var _idController2=TextEditingController();
  bool popUpLoading=false;
+ bool textLoading=false;
+
 
  @override
   Widget build(BuildContext context) {
@@ -159,7 +161,7 @@ class _AddItemState extends State<AddItem> {
 
                           ),
                           SizedBox(height: screenHeight*0.02,),
-                          ElevatedButton(onPressed: (){
+                         textLoading==true? CircularProgressIndicator() : ElevatedButton(onPressed: (){
                             _addItem(_idController.text.trim(),_nameController.text.trim());
 
                           }, child:Text("Add",),   style: ElevatedButton.styleFrom(
@@ -199,7 +201,7 @@ class _AddItemState extends State<AddItem> {
   List<DataRow> getRows(){
   if(searchWord!=null){
     String x=searchWord??"a";
-    return allItems?.where((data) => data.contains(x)).map((data) =>
+    return allItems?.where((data) => data.contains(x.toLowerCase().trim())).map((data) =>
         _buildDataRow(data)).toList() ?? [];
   }
   else{
@@ -214,13 +216,173 @@ class _AddItemState extends State<AddItem> {
       DataCell(SizedBox(
         height: 30,
         child: IconButton(onPressed: (){
-
           showDialog(
             context: context,
-            builder: (context) =>
-                buildAvailableAlert(
-                    context, data),
+            builder: (context) {
+              String contentText = "Content of Dialog";
+              return StatefulBuilder(
+                builder: (context, setState) {
+                  return AlertDialog(
+                      backgroundColor: Colors.white,
+                      titlePadding: EdgeInsets.zero,
+                      title: Container(
+                        decoration: BoxDecoration(color:AppColorss.lightmainColor),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(13.0),
+                            child: Text(
+                              data,
+                              style: TextStyle(color: Colors.white, fontSize: 24),
+                            ),
+                          ),
+                        ),
+                      ),
+                      content: SingleChildScrollView(
+                          child: Container(
+                            width: double.maxFinite,
+                            child: Column(
+                              children: [
+                                Form(
+                                    key:_formU2,
+                                    child:Column(children: [
+                                      SizedBox(height: 10,),
+                                      FractionallySizedBox(
+                                        widthFactor: 0.8,
+                                        child: TextFormField(
+                                            controller: _idController2,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                                            ],
+                                            decoration: const InputDecoration(
+                                              labelText: 'Id',
+                                              hintText: "Enter item's id",
+                                              border: OutlineInputBorder(),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(color:Color(0xFF005466))
+                                              ),
+                                            ),
+                                            validator:(value) {
+                                              if (value!.trim().isEmpty) {
+                                                return "Please enter an id";
+                                              }
+                                              return null;
+                                            }
+                                        ),
+
+                                      ),
+                                      SizedBox(height:10,),
+                                      popUpLoading==true?CircularProgressIndicator():ElevatedButton(onPressed: () async {
+
+                                        final isValid=_formU2.currentState!.validate();
+                                        debugPrint("pop up $isValid");
+                                        if(isValid){
+                                          setState(() {
+                                            popUpLoading=true;
+                                          });
+                                          try{
+                                            bool x=await invC.idUnique(_idController2.text.toLowerCase().trim());
+                                            if(x){
+                                              setState(() {
+                                                popUpLoading=false;
+                                              });
+                                              showPlatformDialog(
+                                                context: context,
+                                                builder: (context) => BasicDialogAlert(
+                                                  title: Text("Authentication Error"),
+                                                  content:
+                                                  Text("Id already exists"),
+                                                  actions: <Widget>[
+                                                    BasicDialogAction(
+                                                      title: Text("OK"),
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                            else{
+                                              try{
+                                                Inventory inv=Inventory(
+                                                  itemId:_idController2.text.toLowerCase().trim(),
+                                                  itemName: data.toLowerCase().trim(),
+                                                  status:"Available", createdBy:loggedInName?? "Omar",
+                                                  creationDate: Timestamp.fromDate(DateTime.now()),
+                                                  administeredBy: "",
+                                                  borrowedUser: "",
+                                                  borrowDeathDate: "",
+                                                  deathReason: "",);
+
+                                                await invC.addItem(inv);
+                                                setState(() {
+                                                  popUpLoading=false;
+                                                });
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Item successfully created!'),
+                                                    backgroundColor: Colors.green,
+                                                  ),
+                                                );
+                                                _idController2.clear();
+                                                _nameController2.clear();
+                                                await _getData();
+                                              }
+                                              catch(e){
+                                                setState(() {
+                                                  popUpLoading=false;
+                                                });
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Error adding item,try again!'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          }
+                                          catch(e){
+                                            setState(() {
+                                              popUpLoading=false;
+                                            });
+                                            showPlatformDialog(
+                                              context: context,
+                                              builder: (context) => BasicDialogAlert(
+                                                title: Text("Error Occured"),
+                                                content:
+                                                Text(e.toString()),
+                                                actions: <Widget>[
+                                                  BasicDialogAction(
+                                                    title: Text("OK"),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+
+                                        }
+                                      }, child:Text("Add",),   style: ElevatedButton.styleFrom(
+                                          backgroundColor:AppColorss.lightmainColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(15),
+                                          ),
+                                          minimumSize: Size(100, 30)
+                                      ),)
+                                    ],)
+                                )
+
+                              ],
+                            ),
+                          ))
+                  );
+                },
+              );
+            },
           );
+
         },icon: Icon(Icons.add)),
       ))
     ]
@@ -230,8 +392,14 @@ class _AddItemState extends State<AddItem> {
     final isValid=_formU.currentState!.validate();
     if(isValid){
       try{
+        setState(() {
+          textLoading=true;
+        });
         bool x=await invC.idUnique(id.toLowerCase().trim());
         if(x){
+          setState(() {
+            textLoading=false;
+          });
           showPlatformDialog(
             context: context,
             builder: (context) => BasicDialogAlert(
@@ -266,6 +434,9 @@ class _AddItemState extends State<AddItem> {
               deathReason: "",
             );
             await invC.addItem(inv);
+            setState(() {
+              textLoading=false;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Item successfully created!'),
@@ -277,6 +448,9 @@ class _AddItemState extends State<AddItem> {
             await _getData();
           }
           catch(e){
+            setState(() {
+              textLoading=false;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Error Creating item,try again!'),
@@ -287,6 +461,9 @@ class _AddItemState extends State<AddItem> {
         }
       }
       catch(e){
+        setState(() {
+          textLoading=false;
+        });
         showPlatformDialog(
           context: context,
           builder: (context) => BasicDialogAlert(
@@ -308,85 +485,6 @@ class _AddItemState extends State<AddItem> {
     }
 
   }
-  Future<void> _addItem2(String id, String name)async {
-   final isValid=_formU2.currentState!.validate();
-   debugPrint("pop up $isValid");
-   if(isValid){
-     try{
-       bool x=await invC.idUnique(id.toLowerCase().trim());
-       if(x){
-         showPlatformDialog(
-           context: context,
-           builder: (context) => BasicDialogAlert(
-             title: Text("Authentication Error"),
-             content:
-             Text("Id already exists"),
-             actions: <Widget>[
-               BasicDialogAction(
-                 title: Text("OK"),
-                 onPressed: () {
-                   Navigator.pop(context);
-                 },
-               ),
-             ],
-           ),
-         );
-       }
-       else{
-         try{
-           Inventory inv=Inventory(
-             itemId:id.toLowerCase().trim(),
-             itemName: name.toLowerCase().trim(),
-             status:"Available", createdBy:loggedInName?? "Omar",
-             creationDate: Timestamp.fromDate(DateTime.now()),
-             administeredBy: "",
-             borrowedUser: "",
-             borrowDeathDate: "",
-             deathReason: "",);
-
-           await invC.addItem(inv);
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: Text('Item successfully created!'),
-               backgroundColor: Colors.green,
-             ),
-           );
-           _idController2.clear();
-           _nameController2.clear();
-           await _getData();
-         }
-         catch(e){
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: Text('Error adding item,try again!'),
-               backgroundColor: Colors.red,
-             ),
-           );
-         }
-       }
-     }
-     catch(e){
-       showPlatformDialog(
-         context: context,
-         builder: (context) => BasicDialogAlert(
-           title: Text("Error Occured"),
-           content:
-           Text(e.toString()),
-           actions: <Widget>[
-             BasicDialogAction(
-               title: Text("OK"),
-               onPressed: () {
-                 Navigator.pop(context);
-               },
-             ),
-           ],
-         ),
-       );
-     }
-
-   }
-
- }
 
  @override
   void initState() {
@@ -425,74 +523,5 @@ class _AddItemState extends State<AddItem> {
 
      });
    }
- }
-  AlertDialog buildAvailableAlert(BuildContext context, String itemName){
-    return AlertDialog(
-      backgroundColor: Colors.white,
-      titlePadding: EdgeInsets.zero,
-      title: Container(
-        decoration: BoxDecoration(color:AppColorss.lightmainColor),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(13.0),
-            child: Text(
-              itemName,
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            ),
-          ),
-        ),
-      ),
-     content: SingleChildScrollView(
-      child: Container(
-      width: double.maxFinite,
-        child: Column(
-          children: [
-            Form(
-            key:_formU2,
-              child:Column(children: [
-                SizedBox(height: 10,),
-                FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: TextFormField(
-                      controller: _idController2,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.deny(new RegExp(r"\s"))
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Id',
-                        hintText: "Enter item's id",
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color:Color(0xFF005466))
-                        ),
-                      ),
-                      validator:(value) {
-                        if (value!.trim().isEmpty) {
-                          return "Please enter an id";
-                        }
-                        return null;
-                      }
-                  ),
-
-                ),
-                SizedBox(height:10,),
-                ElevatedButton(onPressed: (){
-                  popUpLoading=true;
-                  _addItem2(_idController2.text.toLowerCase().trim(),itemName.toLowerCase().trim());
-
-                }, child:Text("Add",),   style: ElevatedButton.styleFrom(
-                    backgroundColor:AppColorss.lightmainColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    minimumSize: Size(100, 30)
-                ),)
-              ],)
-            )
-
-          ],
-        ),
-   ))
-    );
  }
 }

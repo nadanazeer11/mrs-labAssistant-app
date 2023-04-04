@@ -39,6 +39,10 @@ class _Inventory5State extends State<Inventory5> {
   var borrowUserController=TextEditingController();
   var returnUserController=TextEditingController();
   var deadReasonController=TextEditingController();
+  bool giveAccessloading=false;
+  bool returnBackLoading=false;
+  bool deadLoading=false;
+  bool isChecked = false;
 
   @override
   void initState() {
@@ -305,15 +309,13 @@ class _Inventory5State extends State<Inventory5> {
   }
 
   Widget buildDataTable(List<Inventory>? inventory) {
-    // final columns = ['Id', 'Name', 'Status',"Creation Date"];
-
     return DataTable(
       headingRowColor: MaterialStateProperty.resolveWith(
-              (states) => AppColorss.lightmainColor),
+              (states) =>Color(0xFFBACDDB)),
       headingRowHeight: 30,
       columns: getColumns(columns),
       rows: getInventoryRows(inventory),
-      border: TableBorder.all(color: AppColorss.mainblackColor,
+      border: TableBorder.all(color: Colors.black38,
           width: 2, borderRadius: BorderRadius.circular(16.0)),);
   }
 
@@ -322,7 +324,7 @@ class _Inventory5State extends State<Inventory5> {
           .map((String column) =>
           DataColumn(
             label: Text(column, style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w500),),
+                color: Colors.black, fontWeight: FontWeight.w500),),
           ))
           .toList();
 
@@ -467,23 +469,28 @@ class _Inventory5State extends State<Inventory5> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              onSelected: (value) {
+              onSelected: (value)async {
                   if(value=="av"){
                     String status="Return";
                     Navigator.pop(context);
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          returnBackDeadAlert(context,itemName,itemId,"Return"),
-                    );
+
+                    // showDialog(
+                    //   context: context,
+                    //   builder: (context) =>
+                    //       returnBackDeadAlert(context,itemName,itemId,"Return"),
+                    // );
+                    returnBackdeadAlert(itemName,itemId,"Return");
                   }
                   if(value=="dead"){
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          returnBackDeadAlert(
-                              context, itemName,itemId,"Dead"),
-                    );
+                    // showDialog(
+                    //   context: context,
+                    //   builder: (context) =>
+                    //       returnBackDeadAlert(
+                    //           context, itemName,itemId,"Dead"),
+                    // );
+                    Navigator.pop(context);
+
+                    returnBackdeadAlert(itemName,itemId,"Dead");
                   }
 
               },
@@ -597,79 +604,6 @@ class _Inventory5State extends State<Inventory5> {
     );
   }
 
-  AlertDialog statusAlert(BuildContext context, String itemName,String itemId){
-    String itemName2 = "$itemName #$itemId";
-    return AlertDialog(
-        backgroundColor: Colors.white,
-        titlePadding: EdgeInsets.zero,
-        title: Container(
-          decoration: BoxDecoration(color:AppColorss.lightmainColor),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(13.0),
-              child: Text(
-                itemName2,
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-          ),
-        ),
-        content: SingleChildScrollView(
-            child: Container(
-              width: double.maxFinite,
-              child: Column(
-                children: [
-                  Form(
-                      key:_formU2,
-                      child:Column(children: [
-                        SizedBox(height: 10,),
-                        FractionallySizedBox(
-                          widthFactor: 0.8,
-                          child: TextFormField(
-                              controller: borrowUserController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.deny(new RegExp(r"\s"))
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Username',
-                                hintText: "Give access to",
-                                border: OutlineInputBorder(),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color:Color(0xFF005466))
-                                ),
-                              ),
-                              validator:(value) {
-                                if (value!.trim().isEmpty) {
-                                  return "Please enter an id";
-                                }
-                                return null;
-                              }
-                          ),
-
-                        ),
-                        SizedBox(height:10,),
-                        ElevatedButton(onPressed: (){
-                          final isValid = _formU2.currentState!.validate();
-                          if(isValid){
-                            borrowTo(context,
-                                itemId,borrowUserController.text.trim().toLowerCase());
-
-                          }
-                        }, child:Text("Give Access",),   style: ElevatedButton.styleFrom(
-                            backgroundColor:AppColorss.lightmainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            minimumSize: Size(100, 30)
-                        ),)
-                      ],)
-                  )
-
-                ],
-              ),
-            ))
-    );
-  }
 
 
   AlertDialog buildSummaryAlert(BuildContext context) {
@@ -795,43 +729,6 @@ class _Inventory5State extends State<Inventory5> {
       );
     }
   }
-  Future<void> borrowTo(BuildContext context,String itemId,String username)async{
-    try{
-      bool exists=await inventoryC.userNameCheck(username);
-      if(exists){
-        DateTime now = DateTime.now();
-        String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
-        changeStatus(context, itemId, formattedDate, username,"Borrowed","");
-      }
-      else{
-        showPlatformDialog(
-          context: context,
-          builder: (context) => BasicDialogAlert(
-            title: Text("Authentication Error"),
-            content:
-            Text("Username doesnt exist"),
-            actions: <Widget>[
-              BasicDialogAction(
-                title: Text("OK"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      }
-    }
-    catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Error checking if username exists,try again!"),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-    }
-  }
 
   AlertDialog buildAvailableAlert(BuildContext context, String itemName,String itemId) {
     debugPrint("pressed on available alert with itemname $itemName with id $itemId");
@@ -861,24 +758,20 @@ class _Inventory5State extends State<Inventory5> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              onSelected: (value) {
+              onSelected: (value) async{
                 Navigator.pop(context);
-                if(value=="av"){
-                  showDialog(
-                    context: context,
-                    builder: (context) =>
-                        statusAlert(
-                            context, itemName,itemId),
-                  );
+                if(value=="av") {
+                  giveAccessAlert(itemName,itemId);
                 }
                 if(value=="dead"){
-                  showDialog(
-                    context: context,
-                    builder: (context) =>
-                        returnBackDeadAlert(
-                            context, itemName,itemId,"Dead"),
-                  );
+                  // showDialog(
+                  //   context: context,
+                  //   builder: (context) =>
+                  //       returnBackDeadAlert(
+                  //           context, itemName,itemId,"Dead"),
+                  // );
 
+                  returnBackdeadAlert(itemName, itemId, "Dead");
                 }
 
 
@@ -944,201 +837,359 @@ class _Inventory5State extends State<Inventory5> {
       ],
     );
   }
-  AlertDialog returnBackDeadAlert(BuildContext context, String itemName,String itemId,String status){
-    String itemName2 = "$itemName #$itemId";
-    return AlertDialog(
-        backgroundColor: Colors.white,
-        titlePadding: EdgeInsets.zero,
-        title: Container(
-          decoration: BoxDecoration(color:AppColorss.lightmainColor),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(13.0),
-              child: Text(
-                itemName2,
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-          ),
-        ),
-        content: SingleChildScrollView(
-            child: Container(
-              width: double.maxFinite,
-              child: Column(
-                children: [
-                  Form(
-                      key:status=="Return"?_formReturnBack:_formdead,
-                      child:Column(children: [
-                        SizedBox(height: 10,),
-                        FractionallySizedBox(
-                          widthFactor: 0.8,
-                          child:status=="Return"?
-                          TextFormField(
-                              controller:returnUserController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.deny(new RegExp(r"\s"))
-                              ],
-                              decoration: const InputDecoration(
-                                labelText: 'Username',
-                                hintText: "Returnee Username",
-                                border: OutlineInputBorder(),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color:Color(0xFF005466))
+  returnBackdeadAlert( String itemName,String itemId,String status){
+    showDialog(
+      context: context,
+      builder: (context) {
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            String itemName2 = "$itemName #$itemId";
+            return AlertDialog(
+                backgroundColor: Colors.white,
+                titlePadding: EdgeInsets.zero,
+                title: Container(
+                  decoration: BoxDecoration(color:AppColorss.lightmainColor),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(13.0),
+                      child: Text(
+                        itemName2,
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      ),
+                    ),
+                  ),
+                ),
+                content: SingleChildScrollView(
+                    child: Container(
+                      width: double.maxFinite,
+                      child: Column(
+                        children: [
+                          Form(
+                              key:status=="Return"?_formReturnBack:_formdead,
+                              child:Column(children: [
+                                SizedBox(height: 10,),
+                                FractionallySizedBox(
+                                    widthFactor: 0.8,
+                                    child:status=="Return"?
+                                    TextFormField(
+                                        controller:returnUserController,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                                        ],
+                                        decoration: const InputDecoration(
+                                          labelText: 'Username',
+                                          hintText: "Returnee Username",
+                                          border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color:Color(0xFF005466))
+                                          ),
+                                        ),
+                                        validator:(value) {
+                                          if (value!.trim().isEmpty) {
+                                            return "Please enter a username";
+                                          }
+                                          return null;
+                                        }
+                                    ):
+                                    TextFormField(
+                                        controller:deadReasonController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Death Reason',
+                                          hintText: "Reason of death",
+                                          border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color:Color(0xFF005466))
+                                          ),
+                                        ),
+                                        validator:(value) {
+                                          if (value!.trim().isEmpty) {
+                                            return "Please enter a reason";
+                                          }
+                                          return null;
+                                        }
+                                    )
+
                                 ),
-                              ),
-                              validator:(value) {
-                                if (value!.trim().isEmpty) {
-                                  return "Please enter a username";
-                                }
-                                return null;
-                              }
-                          ):
-                          TextFormField(
-                              controller:deadReasonController,
-                              decoration: const InputDecoration(
-                                labelText: 'Death Reason',
-                                hintText: "Reason of death",
-                                border: OutlineInputBorder(),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color:Color(0xFF005466))
-                                ),
-                              ),
-                              validator:(value) {
-                                if (value!.trim().isEmpty) {
-                                  return "Please enter a reason";
-                                }
-                                return null;
-                              }
-                          )
+                                SizedBox(height:10,),
+                                status=="Return"?
+                                returnBackLoading==true? CircularProgressIndicator():ElevatedButton(onPressed: () async{
+                                  final isValid = _formReturnBack.currentState!.validate();
+                                  if(isValid){
+                                    setState(() {
+                                      returnBackLoading=true;
+                                    });
+                                    String username=returnUserController.text.trim().toLowerCase();
+                                    // returnBackMethod(context,
+                                    //     itemId,returnUserController.text.trim().toLowerCase());
+                                    try{
+                                      bool exists=await inventoryC.userNameCheck(username);
+                                      if(exists){
+                                        try{
+                                          bool correctPerson=await inventoryC.checkReturnee(username, itemId);
+                                          if(correctPerson){
+                                            changeStatus(context, itemId, "", "","Available","");
+                                          }
+                                          else{
+                                              setState(() {
+                                          returnBackLoading=false;
+                                        });
+                                            showPlatformDialog(
+                                              context: context,
+                                              builder: (context) => BasicDialogAlert(
+                                                title: Text("Authentication Error"),
+                                                content:
+                                                Text("Item was not borrowed by this user"),
+                                                actions: <Widget>[
+                                                  BasicDialogAction(
+                                                    title: Text("OK"),
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                        }
+                                        catch(e){
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Error checking if correct user,try again!"),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
 
-                        ),
-                        SizedBox(height:10,),
-                        status=="Return"?
-                        ElevatedButton(onPressed: (){
-                              formReturnBack(itemId,"Available");
-                        }, child:Text("Return back",),   style: ElevatedButton.styleFrom(
-                            backgroundColor:AppColorss.lightmainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            minimumSize: Size(100, 30)
-                        ),):
-                        ElevatedButton(onPressed: (){
-                          formReturnBack(itemId,"Dead");
-                        }, child:Text("Submit Reason",),   style: ElevatedButton.styleFrom(
-                            backgroundColor:AppColorss.lightmainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            minimumSize: Size(100, 30)
-                        ),)
+                                        DateTime now = DateTime.now();
+                                        String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
 
-                      ],)
-                  )
+                                      }
+                                      else{
+                                        setState(() {
+                                          returnBackLoading=false;
+                                        });
+                                        showPlatformDialog(
+                                          context: context,
+                                          builder: (context) => BasicDialogAlert(
+                                            title: Text("Authentication Error"),
+                                            content:
+                                            Text("Username doesnt exist"),
+                                            actions: <Widget>[
+                                              BasicDialogAction(
+                                                title: Text("OK"),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }
+                                    catch(e){
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text("Error checking if username exists,try again!"),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
 
-                ],
-              ),
-            ))
+                                    }
+                                  }
+                                }, child:Text("Return back",),   style: ElevatedButton.styleFrom(
+                                    backgroundColor:AppColorss.lightmainColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    minimumSize: Size(100, 30)
+                                ),):
+                               deadLoading==true?CircularProgressIndicator(): ElevatedButton(onPressed: (){
+                                 final isValid=_formdead.currentState!.validate();
+                                 if(isValid){
+                                   setState(() {
+                                     deadLoading=true;
+                                   });
+                                   DateTime now = DateTime.now();
+                                   String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
+                                   changeStatus(context, itemId, formattedDate, "", "Dead",deadReasonController.text);
+                                 }
+                                }, child:Text("Submit Reason",),   style: ElevatedButton.styleFrom(
+                                    backgroundColor:AppColorss.lightmainColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    minimumSize: Size(100, 30)
+                                ),)
+
+                              ],)
+                          ),
+
+
+                        ],
+                      ),
+                    ))
+            );
+          },
+        );
+      },
     );
   }
-  Future<void> formReturnBack(String itemId,String status)async {
-    if (status=="Available"){
-      final isValid = _formReturnBack.currentState!.validate();
-      if(isValid){
-        returnBackMethod(context,
-            itemId,returnUserController.text.trim().toLowerCase());
-      }
-    }
-    else if (status=="Dead"){
-      final isValid=_formdead.currentState!.validate();
-      if(isValid){
-        DateTime now = DateTime.now();
-        String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
-        changeStatus(context, itemId, formattedDate, "", "Dead",deadReasonController.text);
-      }
-    }
 
-
-  }
-  Future<void> returnBackMethod(BuildContext context,String itemId,String username)async{
-    try{
-      bool exists=await inventoryC.userNameCheck(username);
-      if(exists){
-        try{
-          bool correctPerson=await inventoryC.checkReturnee(username, itemId);
-          if(correctPerson){
-            changeStatus(context, itemId, "", "","Available","");
-          }
-          else{
-            showPlatformDialog(
-              context: context,
-              builder: (context) => BasicDialogAlert(
-                title: Text("Authentication Error"),
-                content:
-                Text("Item was not borrowed by this user"),
-                actions: <Widget>[
-                  BasicDialogAction(
-                    title: Text("OK"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+  giveAccessAlert( String itemName,String itemId) {
+    String itemName2 = "$itemName #$itemId";
+    showDialog(
+      context: context,
+      builder: (context) {
+        String contentText = "Content of Dialog";
+        return StatefulBuilder(
+          builder: (context, setState)
+        {
+          return AlertDialog(
+              backgroundColor: Colors.white,
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                decoration: BoxDecoration(color: AppColorss.lightmainColor),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(13.0),
+                    child: Text(
+                      itemName2,
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ),
                   ),
-                ],
+                ),
               ),
-            );
-          }
-        }
-        catch(e){
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Error checking if correct user,try again!"),
-              backgroundColor: Colors.red,
-            ),
+              content: SingleChildScrollView(
+                  child: Container(
+                    width: double.maxFinite,
+                    child: Column(
+                      children: [
+                        Form(
+                            key: _formU2,
+                            child: Column(children: [
+                              SizedBox(height: 10,),
+                              FractionallySizedBox(
+                                widthFactor: 0.8,
+                                child: TextFormField(
+                                    controller: borrowUserController,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.deny(
+                                          new RegExp(r"\s"))
+                                    ],
+                                    decoration: const InputDecoration(
+                                      labelText: 'Username',
+                                      hintText: "Give access to",
+                                      border: OutlineInputBorder(),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Color(0xFF005466))
+                                      ),
+                                    ),
+                                    validator: (value) {
+                                      if (value!.trim().isEmpty) {
+                                        return "Please enter an id";
+                                      }
+                                      return null;
+                                    }
+                                ),
+
+                              ),
+                              SizedBox(height: 10,),
+                              giveAccessloading == true
+                                  ? CircularProgressIndicator()
+                                  : ElevatedButton(onPressed: () async {
+                                final isValid = _formU2.currentState!
+                                    .validate();
+                                if (isValid) {
+                                  setState(() {
+                                    giveAccessloading = true;
+                                  });
+                                  // borrowTo(context,
+                                  //     itemId, borrowUserController.text.trim()
+                                  //         .toLowerCase());
+                                  // String itemId=itemId;
+                                  String username=borrowUserController.text.trim()
+                                      .toLowerCase();
+
+                                  try{
+                                    bool exists=await inventoryC.userNameCheck(username);
+                                    if(exists){
+                                      DateTime now = DateTime.now();
+                                      String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
+                                      changeStatus(context, itemId, formattedDate, username,"Borrowed","");
+                                    }
+                                    else{
+                                      setState(() {
+                                        giveAccessloading=false;
+                                      });
+                                      showPlatformDialog(
+                                        context: context,
+                                        builder: (context) => BasicDialogAlert(
+                                          title: Text("Authentication Error"),
+                                          content:
+                                          Text("Username doesnt exist"),
+                                          actions: <Widget>[
+                                            BasicDialogAction(
+                                              title: Text("OK"),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  }
+                                  catch(e){
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Error checking if username exists,try again!"),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+
+                                  }
+                                }
+                              },
+                                child: Text("Give Access",),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColorss.lightmainColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    minimumSize: Size(100, 30)
+                                ),)
+                            ],)
+                        ),
+                      ],
+                    ),
+                  ))
           );
         }
-
-        DateTime now = DateTime.now();
-        String formattedDate = DateFormat('dd/MM/yy HH:mm a').format(now);
-
-      }
-      else{
-        showPlatformDialog(
-          context: context,
-          builder: (context) => BasicDialogAlert(
-            title: Text("Authentication Error"),
-            content:
-            Text("Username doesnt exist"),
-            actions: <Widget>[
-              BasicDialogAction(
-                title: Text("OK"),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
         );
-      }
-    }
-    catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Error checking if username exists,try again!"),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-    }
+      },
+    );
   }
-
 
   Future<void> changeStatus(BuildContext context, String itemId, String date,
       String username, String status,String deathReason) async {
     try {
       await inventoryC.changeStatus(itemId, status, loggedInName, date, username, deathReason);
-      if(status=="Borrowed"){borrowUserController.clear();}
-      else if(status=="Available"){returnUserController.clear();}
-      else if(status=="Dead"){deadReasonController.clear();}
+      if(status=="Borrowed"){
+        borrowUserController.clear();setState(() {
+        giveAccessloading=false;
+      }); }
+      else if(status=="Available"){
+        setState(() {
+          returnBackLoading=false;
+        });
+        returnUserController.clear();}
+      else if(status=="Dead"){
+        setState(() {
+          deadLoading=false;
+        });
+        deadReasonController.clear();}
       Navigator.pop(context);
        status=="Borrowed" ?ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(
@@ -1158,6 +1209,11 @@ class _Inventory5State extends State<Inventory5> {
        );
     }
     catch (e) {
+      setState(() {
+        giveAccessloading=false;
+        deadLoading=false;
+        returnBackLoading=false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Error updating status,try again!"),
@@ -1166,89 +1222,4 @@ class _Inventory5State extends State<Inventory5> {
       );
     }
   }
-}
-class RowSource extends DataTableSource {
-  Inventory5 inn=Inventory5();
-  List<Inventory> myData;
-  final count;
-  String ? filter;
-  String ? searchWord;
-  RowSource({
-    required this.myData,
-    required this.count,
-    required this.filter,
-    required this.searchWord
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    if (index < rowCount) {
-      String x = searchWord ?? "a";
-      String filters = filter ?? "all";
-      bool searchNotEmpty = searchWord?.isNotEmpty ?? false;
-      bool filterNotEmpty = filter?.isNotEmpty ?? false;
-      Inventory data=myData[index];
-      if (searchWord != null && searchNotEmpty) {
-
-        if (data.itemName.toLowerCase().contains(x.trim().toLowerCase()) ||
-            data.itemId.trim().startsWith(x)) {
-          if (filter != null && filterNotEmpty) {
-            if (data.status == filter) {
-              return recentFileDataRow(myData![index]);
-            } else {
-              return null;
-            }
-          } else {
-            return recentFileDataRow(myData![index]);
-          }
-        } else {
-          return null;
-        }
-      }
-      if (filter != null && filterNotEmpty) {
-        if (data.status == filter) {
-          if (searchWord != null && searchNotEmpty) {
-            if (data.itemName.toLowerCase().contains(x.trim().toLowerCase())) {
-              return recentFileDataRow(myData![index]);
-            }
-            else {
-              return null;
-            }
-          }
-          else {
-            return recentFileDataRow(myData![index]);
-          }
-        }
-        else {
-          return null;
-        }
-      }
-      return recentFileDataRow(myData![index]);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => count;
-
-  @override
-  int get selectedRowCount => 0;
-}
-
-DataRow recentFileDataRow(Inventory data) {
-
-  return DataRow(
-    cells: [
-      DataCell(Text(data.status ?? "Name")),
-      DataCell(Text(data.status.toString())),
-      DataCell(Text(data.status.toString())),
-      DataCell(Text(data.status.toString())),
-      DataCell(Text(data.status.toString())),
-    ],
-  );
-
 }
