@@ -174,4 +174,15 @@ class InventContr{
       throw Exception("g");
     }
   }
+  Future<void> deleteItem(String itemId) async{
+    try{
+      QuerySnapshot x=await _db.collection('inventory').where("itemId",isEqualTo: itemId).get();
+      String docId =x.docs.first.id;
+      await _db.collection('inventory').doc(docId).delete();
+    }
+    catch(e){
+      throw Exception("sorry");
+
+    }
+  }
 }

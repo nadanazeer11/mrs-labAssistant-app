@@ -39,10 +39,13 @@ class _Inventory5State extends State<Inventory5> {
   var borrowUserController=TextEditingController();
   var returnUserController=TextEditingController();
   var deadReasonController=TextEditingController();
+  InventContr inventoryC = InventContr();
   bool giveAccessloading=false;
   bool returnBackLoading=false;
   bool deadLoading=false;
   bool isChecked = false;
+  bool isLoading=true;
+  bool deleteLoading=false;
 
   @override
   void initState() {
@@ -52,87 +55,94 @@ class _Inventory5State extends State<Inventory5> {
 
   void _loadData() async {
     debugPrint("load data");
-    await _getLoggedInId();
-    await _getLoggedInName();
-    await _isAdmin();
-    await _getAdmins();
     setState(() {
-      isTrue = true;
+      isLoading=true;
     });
-    // await saveFile();
-  }
-
-  Future<void> _getLoggedInName() async {
     try {
-      String x = await getLoggedInName();
-      setState(() {
-        loggedInName = x;
-      });
-    }
-    catch (e) {
-      setState(() {
+      //get logged in id
 
-      });
-    }
-  }
-
-  Future<void> _getLoggedInId() async {
-    try {
       String x = await getIdofUser();
       setState(() {
         loggedInId = x;
       });
+      try {
+        //get loggedInName
+        setState(() {
+          isLoading=true;
+        });
+        String x = await getLoggedInName();
+        setState(() {
+          loggedInName = x;
+        });
+        //get isAdmin
+        try {
+          setState(() {
+            isLoading=true;
+          });
+          bool x = await inventoryC.isAdmin(loggedInId);
+          setState(() {
+            isAdmin = x;
+          });
+          //get all admins
+          try {
+            setState(() {
+              isLoading=true;
+            });
+            List<String> admins = await inventoryC.allAdmins();
+            setState(() {
+              allAdmins = admins;
+            });
+            setState(() {
+              isTrue=true;
+              isLoading=false;
+            });
+          }
+          catch (e) {
+            setState(() {
+              isLoading=false;
+            });
+
+          }
+        }
+        catch (e) {
+          setState(() {
+            isLoading=false;
+          });
+
+        }
+      }
+      catch (e) {
+        debugPrint("Fff");
+        setState(() {
+          isLoading=false;
+        });
+      }
       debugPrint("iddddddddddddddddd$loggedInId");
     }
     catch (e) {
-      setState(() {});
-    }
-  }
-
-  Future<void> _isAdmin() async {
-    try {
-      bool x = await inventoryC.isAdmin(loggedInId);
       setState(() {
-        isAdmin = x;
+        isLoading=false;
       });
     }
-    catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error checking if inventory manager"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+
+
+    // await saveFile();
   }
 
-  Future<void> _getAdmins() async {
-    try {
-      List<String> admins = await inventoryC.allAdmins();
-      setState(() {
-        allAdmins = admins;
-      });
-    }
-    catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error getting admins"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
-  InventContr inventoryC = InventContr();
+
 
   @override
   Widget build(BuildContext context) {
-    if (isTrue) {
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+    if (isTrue && !isLoading) {
+      debugPrint("inside if true $isTrue");
+
       return StreamBuilder<List<Inventory>>(
           stream: inventoryC.getInventoryLoose(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              //return Center(child: CircularProgressIndicator());
               return Container(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -160,17 +170,6 @@ class _Inventory5State extends State<Inventory5> {
                             debugPrint('your p${value}');
                           },
                         ),
-                        filter != null ? Row(children: [
-                          Text("$filter", style: TextStyle(
-                              color: AppColorss.fontGrey,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w400),),
-                          IconButton(onPressed: () {
-                            setState(() {
-                              filter = null;
-                            });
-                          }, icon: Icon(Icons.clear))
-                        ]) : Container()
                       ],),
 
                       CircularProgressIndicator()
@@ -180,7 +179,29 @@ class _Inventory5State extends State<Inventory5> {
               );
             }
             if (snapshot.hasError) {
-              print('Error: ${snapshot.error}');
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: w*0.12,
+                      height: h * 0.12,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/warning.png"),
+                          // fit:BoxFit.fill
+                        ),
+                      ),
+                    ),
+                    Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+                    Text("in getting inventory.",style: TextStyle(fontSize: 20),),
+                    Text(   "please try loading the page again!",
+                      style: TextStyle(fontSize: 20),)
+                  ],
+                ),
+              );
+
               // Show error message
             }
             if (snapshot.hasData) {
@@ -296,15 +317,62 @@ class _Inventory5State extends State<Inventory5> {
                 ),
               );
             }
-            return const Center(
-                child: Text(
-                  'Something went wrong',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                ));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: w*0.12,
+                    height: h * 0.12,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("assets/warning.png"),
+                        // fit:BoxFit.fill
+                      ),
+                    ),
+                  ),
+                  Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+                  Text("in getting inventory.",style: TextStyle(fontSize: 20),),
+                  Text(   "please try loading the page again!",
+                    style: TextStyle(fontSize: 20),)
+                ],
+              ),
+            );
+
           });
     }
-    else {
-      return const Center(child: CircularProgressIndicator(),);
+    else if(isLoading) {
+      debugPrint("i am loading hahahah");
+      return Center(child: CircularProgressIndicator(),);
+    }
+    else if(!isTrue){
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: w*0.12,
+              height: h * 0.12,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/warning.png"),
+                  // fit:BoxFit.fill
+                ),
+              ),
+            ),
+            Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+            Text("in getting user data.",style: TextStyle(fontSize: 20),),
+            Text(   "please try logging out!",
+              style: TextStyle(fontSize: 20),)
+          ],
+        ),
+      );
+    }
+    else{
+      debugPrint("hey ya nado");
+      return Center(child:CircularProgressIndicator());
     }
   }
 
@@ -318,7 +386,6 @@ class _Inventory5State extends State<Inventory5> {
       border: TableBorder.all(color: Colors.black38,
           width: 2, borderRadius: BorderRadius.circular(16.0)),);
   }
-
   List<DataColumn> getColumns(List<String> columns) =>
       columns
           .map((String column) =>
@@ -327,8 +394,6 @@ class _Inventory5State extends State<Inventory5> {
                 color: Colors.black, fontWeight: FontWeight.w500),),
           ))
           .toList();
-
-
   List<DataRow> getInventoryRows(List<Inventory>? inventory) {
     String x = searchWord ?? "a";
     String filters = filter ?? "all";
@@ -373,7 +438,6 @@ class _Inventory5State extends State<Inventory5> {
       return true;
     }).map((data) => buildDataRow(data)).toList() ?? [];
   }
-
   DataRow buildDataRow(Inventory data) {
     return DataRow(
       cells: <DataCell>[
@@ -439,6 +503,7 @@ class _Inventory5State extends State<Inventory5> {
     );
   }
 
+
   AlertDialog buildAlertDialog(BuildContext context, String borrowedBy,
       String administeredBy, String type,String itemId, String itemName, String userDate,String deathReason) {
     String itemName2 = "$itemName #$itemId";
@@ -451,7 +516,7 @@ class _Inventory5State extends State<Inventory5> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            type=="Borrowed"?
+            type=="Borrowed" && isAdmin==true?
             PopupMenuButton(
               icon: Icon(Icons.settings, color: Colors.white,),
               itemBuilder: (BuildContext context) =>
@@ -464,6 +529,10 @@ class _Inventory5State extends State<Inventory5> {
                   child: Text('Mark as dead'),
                   value: "dead",
                 ),
+                PopupMenuItem(
+                  child: Text('Delete'),
+                  value: "delete",
+                ),
               ],
               // color: Colors.black,
               shape: RoundedRectangleBorder(
@@ -471,30 +540,41 @@ class _Inventory5State extends State<Inventory5> {
               ),
               onSelected: (value)async {
                   if(value=="av"){
-                    String status="Return";
                     Navigator.pop(context);
-
-                    // showDialog(
-                    //   context: context,
-                    //   builder: (context) =>
-                    //       returnBackDeadAlert(context,itemName,itemId,"Return"),
-                    // );
                     returnBackdeadAlert(itemName,itemId,"Return");
                   }
-                  if(value=="dead"){
-                    // showDialog(
-                    //   context: context,
-                    //   builder: (context) =>
-                    //       returnBackDeadAlert(
-                    //           context, itemName,itemId,"Dead"),
-                    // );
+                  else if(value=="dead"){
                     Navigator.pop(context);
-
                     returnBackdeadAlert(itemName,itemId,"Dead");
+                  }
+                  else if(value=="delete"){
+                    Navigator.pop(context);
+                    deleteItem(itemId,itemName);
                   }
 
               },
-            ):Container(),
+            ):type=="Dead" && isAdmin==true ?
+            PopupMenuButton(
+              icon: Icon(Icons.settings, color: Colors.white,),
+              itemBuilder: (BuildContext context) =>
+              [
+                PopupMenuItem(
+                  child: Text('Delete'),
+                  value: "delete",
+                ),
+              ],
+              // color: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              onSelected: (value)async {
+                if(value=="delete"){
+                  Navigator.pop(context);
+                  deleteItem(itemId,itemName);
+                }
+
+              },
+            ) :Container(),
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -605,130 +685,65 @@ class _Inventory5State extends State<Inventory5> {
   }
 
 
+  deleteItem(String itemId,String itemName){
 
-  AlertDialog buildSummaryAlert(BuildContext context) {
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    return AlertDialog(
-      backgroundColor: Colors.white,
-      titlePadding: EdgeInsets.zero,
-      title: Container(
-        decoration: BoxDecoration(color: AppColorss.lightmainColor),
-        child: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(13.0),
-            child: Text(
-              "Inventory Summary",
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            ),
-          ),
-        ),
-      ),
-      content:
-      SizedBox(
-        width: screenWidth * 0.99,
-        child: SingleChildScrollView(
-          child: Container(
-            width: double.maxFinite,
-            child: Column(
-              children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    InventorySummary x = list[index];
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.arrow_forward_ios_outlined,
-                              color: AppColorss.darkFontGrey,),
-                            const SizedBox(width: 14),
-                            Text(x.itemName, style: TextStyle(
-                                color: AppColorss.darkFontGrey),),
-                          ],
-                        ),
-                        SizedBox(height: 12,),
-                        DataTable(
-                          headingRowHeight: 28,
-                          dataRowHeight: 28,
-                          columnSpacing: 20,
-                          border: TableBorder.all(color: Colors.black38,
-                              width: 2,
-                              borderRadius: BorderRadius.circular(2.0)),
-                          columns: const [
-                            DataColumn(label: Text('Available')),
-                            DataColumn(label: Text('Borrowed')),
-                            DataColumn(label: Text('Dead')),
-                          ],
-                          rows: [
-                            DataRow(cells: [
-                              DataCell(Text(x.availableCount.toString())),
-                              DataCell(Text(x.borrowedCount.toString())),
-                              DataCell(Text(x.deadCount.toString())),
-                            ]),
-                          ],
-                        ),
-                        SizedBox(height: 12,),
+  String itemName2 = "$itemName #$itemId";
 
-                      ],
-                    );
-                  },
-                ),
 
-              ],
-            ),
-
-          ),
-        ),
-      ),
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              backgroundColor: AppColorss.lightmainColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text("Delete $itemName2"),
+            content: Text("Are you sure you want to delete?"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Cancel",style: TextStyle(color: Colors.black),),
               ),
-              minimumSize: Size(100, 30)
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('OK!'),
-        )
-      ],
-    );
-  }
-  Future<void> getSumm(BuildContext context) async {
-    try {
-      loadSummary = true;
-      List<InventorySummary> m = await inventoryC.getSummary();
-      setState(() {
-        list = m;
-      });
-      loadSummary = false;
-      showDialog(
-        context: context,
-        builder: (context) =>
-            buildSummaryAlert(context),
+              deleteLoading==true?CircularProgressIndicator():TextButton(
+                onPressed: ()async {
+                  try{
+                    setState((){
+                      deleteLoading=true;
+                    });
+                    await inventoryC.deleteItem(itemId);
+                    setState((){
+                      deleteLoading=false;
+                    });
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(
+                        content: Text("Successfully deleted $itemName2"),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                  catch(e){
+                    setState((){
+                      deleteLoading=false;
+                    });
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Error in deleting $itemName2"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+
+                  }
+                },
+                child: Text("Delete",style: TextStyle(color: Colors.black)),
+              ),
+            ],
+          );
+        },
       );
-    }
-    catch (e) {
-      loadSummary = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error getting summary"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+    },
+  );
+}
 
   AlertDialog buildAvailableAlert(BuildContext context, String itemName,String itemId) {
     debugPrint("pressed on available alert with itemname $itemName with id $itemId");
@@ -741,17 +756,21 @@ class _Inventory5State extends State<Inventory5> {
         decoration: BoxDecoration(color: AppColorss.lightmainColor),
         child: Row(
           children: [
-            PopupMenuButton(
+        isAdmin!=true ? Container():PopupMenuButton(
               icon: Icon(Icons.settings, color: Colors.white,),
               itemBuilder: (BuildContext context) =>
               [
-                PopupMenuItem(
-                  child: Text('Give Access'),
+                const PopupMenuItem(
                   value: "av",
+                  child: Text('Give Access'),
                 ),
-                PopupMenuItem(
-                  child: Text('Mark as dead'),
+                const PopupMenuItem(
                   value: "dead",
+                  child: Text('Mark as dead'),
+                ),
+                const PopupMenuItem(
+                  value: "delete",
+                  child: Text('Delete'),
                 ),
               ],
               // color: Colors.black,
@@ -763,15 +782,12 @@ class _Inventory5State extends State<Inventory5> {
                 if(value=="av") {
                   giveAccessAlert(itemName,itemId);
                 }
-                if(value=="dead"){
-                  // showDialog(
-                  //   context: context,
-                  //   builder: (context) =>
-                  //       returnBackDeadAlert(
-                  //           context, itemName,itemId,"Dead"),
-                  // );
-
+                else if(value=="dead"){
                   returnBackdeadAlert(itemName, itemId, "Dead");
+                }
+                else if(value=="delete"){
+
+                  deleteItem(itemId,itemName);
                 }
 
 
@@ -1222,4 +1238,129 @@ class _Inventory5State extends State<Inventory5> {
       );
     }
   }
+
+  AlertDialog buildSummaryAlert(BuildContext context) {
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      titlePadding: EdgeInsets.zero,
+      title: Container(
+        decoration: BoxDecoration(color: AppColorss.lightmainColor),
+        child: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(13.0),
+            child: Text(
+              "Inventory Summary",
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+          ),
+        ),
+      ),
+      content:
+      SizedBox(
+        width: screenWidth * 0.99,
+        child: SingleChildScrollView(
+          child: Container(
+            width: double.maxFinite,
+            child: Column(
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    InventorySummary x = list[index];
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.arrow_forward_ios_outlined,
+                              color: AppColorss.darkFontGrey,),
+                            const SizedBox(width: 14),
+                            Text(x.itemName, style: TextStyle(
+                                color: AppColorss.darkFontGrey),),
+                          ],
+                        ),
+                        SizedBox(height: 12,),
+                        DataTable(
+                          headingRowHeight: 28,
+                          dataRowHeight: 28,
+                          columnSpacing: 20,
+                          border: TableBorder.all(color: Colors.black38,
+                              width: 2,
+                              borderRadius: BorderRadius.circular(2.0)),
+                          columns: const [
+                            DataColumn(label: Text('Available')),
+                            DataColumn(label: Text('Borrowed')),
+                            DataColumn(label: Text('Dead')),
+                          ],
+                          rows: [
+                            DataRow(cells: [
+                              DataCell(Text(x.availableCount.toString())),
+                              DataCell(Text(x.borrowedCount.toString())),
+                              DataCell(Text(x.deadCount.toString())),
+                            ]),
+                          ],
+                        ),
+                        SizedBox(height: 12,),
+
+                      ],
+                    );
+                  },
+                ),
+
+              ],
+            ),
+
+          ),
+        ),
+      ),
+      actions: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              backgroundColor: AppColorss.lightmainColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              minimumSize: Size(100, 30)
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('OK!'),
+        )
+      ],
+    );
+  }
+  Future<void> getSumm(BuildContext context) async {
+    try {
+      loadSummary = true;
+      List<InventorySummary> m = await inventoryC.getSummary();
+      setState(() {
+        list = m;
+      });
+      loadSummary = false;
+      showDialog(
+        context: context,
+        builder: (context) =>
+            buildSummaryAlert(context),
+      );
+    }
+    catch (e) {
+      loadSummary = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error getting summary"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
 }
