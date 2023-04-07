@@ -301,7 +301,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 ),
                                 Text(
                                     '${project?.description ?? 'N/A'}',
-                                    style: TextStyle(color:Color(0xFF647E68),fontSize: 18)
+                                    style: TextStyle(color:AppColorss.fontGrey,fontSize: 18)
                                 ),
 
                               ],

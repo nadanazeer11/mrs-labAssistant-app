@@ -7,6 +7,7 @@ import 'package:mrs/models/InventoryItems.dart';
 import 'package:mrs/models/Users.dart';
 import 'package:velocity_x/velocity_x.dart';
 
+import '../../models/CompactInventory.dart';
 import '../../models/Inventory.dart';
 import '../../models/Project.dart';
 
@@ -185,4 +186,64 @@ class InventContr{
 
     }
   }
+
+  Stream<List<CompactInventory>> getInventoryCompact() {
+    debugPrint("getInventoryCompact");
+    return _db.collection('compactInventory').orderBy('creationDate', descending: true).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        debugPrint("itemId ${doc['itemId']}, name ${doc['itemName']}, stat ${doc['status']}, cr ${doc['createdBy']}");
+        debugPrint("itemId ${doc['creationDate']}, name ${doc['itemName']}, stat ${doc['status']}, cr ${doc['createdBy']}");
+
+        return CompactInventory(
+            itemId: doc['itemId'],
+            itemName: doc['itemName'],
+            status: doc['status'],
+            createdBy: doc['createdBy'],
+            creationDate: doc['creationDate'],
+            administeredBy: doc['administeredBy'],
+            deathDate: doc['deathDate'],
+            deathReason: doc['deathReason'],
+          description: doc['description']
+        );
+      }).toList();
+    });
+  }
+  Future<void> deleteItem2(String itemId) async{
+    try{
+      QuerySnapshot x=await _db.collection('compactInventory').where("itemId",isEqualTo: itemId).get();
+      String docId =x.docs.first.id;
+      debugPrint("Deleting item with docId $docId");
+      await _db.collection('compactInventory').doc(docId).delete();
+    }
+    catch(e){
+      throw Exception("sorry");
+
+    }
+  }
+  Future<void> changeStatus2(String id,String status,String admin,String date,String user,String deathReason)async{
+    try{
+      debugPrint("beware changing status of $id by $admin to $status with death Reason $deathReason");
+      final QuerySnapshot snapshot = await _db.collection('compactInventory')
+          .where('itemId', isEqualTo: id)
+          .get();
+      final DocumentSnapshot userDoc = snapshot.docs.first;
+      debugPrint("got the document ");
+      final String userId = userDoc.id;
+      debugPrint("id of document im trying to change");
+      await FirebaseFirestore.instance.collection('compactInventory').doc(userId).update(
+          {
+            'status':status,
+            'administeredBy':status!="Available"? admin:"",
+            'deathDate':status!="Available"? date:"",
+            'deathReason':status=="Dead"? deathReason:""
+          });
+    }
+    catch(e){
+      debugPrint(e.toString());
+      debugPrint("om el error");
+      throw Exception("f");
+    }
+  }
+
+
 }
