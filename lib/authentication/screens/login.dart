@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mrs/config/colors.dart';
 
 import '../backend/authenticate.dart';
@@ -19,67 +20,81 @@ class _LoginState extends State<Login> {
   final _formLogin=GlobalKey<FormState>();
   bool _loading=false;
   String errorMessage="";
+  bool _isMounted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isMounted = true;
+  }
+
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    _isMounted = false;
     super.dispose();
   }
-  @override
-  Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
-    double h = MediaQuery.of(context).size.height;
-    void _submitLogin()async{
-      final isValid=_formLogin.currentState!.validate();
-      int error=-100;
-      FirebaseAuthException? res;
-      if(isValid){
+  void _submitLogin()async{
+    final isValid=_formLogin.currentState!.validate();
+    int error=-100;
+    FirebaseAuthException? res;
+    if(isValid){
+      if (_isMounted) {
         setState(() {
-          _loading=true;
+          _loading = true;
         });
-        try{
-          res=await authenticate.loginMethod(emailController.text, passwordController.text);
-          if(res!=null){
-            if(res.code=='invalid-email'){
+        try {
+          res = await authenticate.loginMethod(
+              emailController.text.trim().toLowerCase(),
+              passwordController.text.trim());
+          if (res != null) {
+            if (res.code == 'invalid-email') {
               setState(() {
-                _loading=false;
-                errorMessage="Invalid Email";
+                _loading = false;
+                errorMessage = "Invalid Email";
               });
             }
-            else if(res.code=="user-not-found"){
+            else if (res.code == "user-not-found") {
               setState(() {
-                _loading=false;
-                errorMessage="User not found";
+                _loading = false;
+                errorMessage = "User not found";
               });
             }
-            else if(res.code=="wrong-password"){
+            else if (res.code == "wrong-password") {
               setState(() {
-                _loading=false;
-                errorMessage="Wrong Password";
+                _loading = false;
+                errorMessage = "Wrong Password";
               });
             }
-            else{
+            else {
               setState(() {
-                _loading=false;
-                errorMessage="Error in connection,please try again";
+                _loading = false;
+                errorMessage = "Error in connection,please try again";
               });
             }
           }
-          else{
+          else {
             setState(() {
-              _loading=false;
-              errorMessage="";
+              _loading = false;
+              errorMessage = "";
             });
             Navigator.popAndPushNamed(context, '/home');
           }
         }
-        catch(e){
+        catch (e) {
           setState(() {
-            _loading=false;
-            errorMessage="Error in connection,please try again";
+            _loading = false;
+            errorMessage = "Error in connection,please try again";
           });
         }
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SingleChildScrollView(
         child: Form(
@@ -124,6 +139,9 @@ class _LoginState extends State<Login> {
                           child: TextFormField(
                             keyboardType: TextInputType.emailAddress,
                               controller:emailController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                              ],
                             decoration:InputDecoration(
                                 hintText: "Email",
                                 prefixIcon: Icon(
@@ -176,12 +194,15 @@ class _LoginState extends State<Login> {
 
                           ),
                           child: TextFormField(
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                            ],
                             keyboardType: TextInputType.visiblePassword,
                             obscureText: _obsecureText,
                             controller:passwordController,
                               validator:(value){
-                                if(value!.isEmpty || value.length<7){
-                                  return "Password should be at least 7 characters";
+                                if(value!.isEmpty){
+                                  return "Please enter a password";
                                 }
                                 else{
                                   return null;
@@ -218,13 +239,6 @@ class _LoginState extends State<Login> {
                             ),
                           )
                       ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: TextButton(onPressed: (){
-                          Navigator.pushNamed(context, '/forgetPassword');
-                        }, child:
-                        Text("Forgot Your Password?",style: TextStyle(color: Colors.grey),)),
-                      )
                     ],
                   )
               ),
@@ -240,29 +254,6 @@ class _LoginState extends State<Login> {
                       minimumSize: Size(170, 40)
                   )),
               SizedBox(height: 10,),
-              Padding(
-                padding:const EdgeInsets.fromLTRB(58, 0, 0, 0),
-                child: Row(
-                  children: [
-                    Text("Don't Have An Account?",
-                        style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 20
-                        )),
-                    TextButton(onPressed: () {
-                      Navigator.popAndPushNamed(context,'/signUp');
-                    }, child: Text("Create",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold
-                        )
-                    )
-                    )
-                  ],
-                ),
-
-              )
             ],
           ),
         ),

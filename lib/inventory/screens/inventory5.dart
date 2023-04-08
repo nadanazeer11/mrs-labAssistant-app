@@ -250,7 +250,8 @@ class _Inventory5State extends State<Inventory5> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: PopupMenuButton(
+                      child:
+                      PopupMenuButton(
                         initialValue: initialValue,
                         icon: Icon(
                           Icons.arrow_drop_down_circle_outlined,
@@ -886,13 +887,15 @@ class _Inventory5State extends State<Inventory5> {
             })
       ]);
       //return
-    } else if (isLoading) {
+    }
+    else if (isLoading) {
       debugPrint("i am loading hahahah");
       return Center(
         child: CircularProgressIndicator(),
       );
     } else if (!isTrue) {
-      return Center(
+      return
+        Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1064,7 +1067,9 @@ class _Inventory5State extends State<Inventory5> {
             ),
           ),
         ),
-        DataCell(Text(DateFormat.yMd().format(data.creationDate.toDate()))),
+        DataCell(Text(DateFormat(
+            'dd/MM/yy')
+            .format(data.creationDate.toDate()))),
         DataCell(Text(data.createdBy)),
       ],
     );

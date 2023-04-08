@@ -244,6 +244,29 @@ class InventContr{
       throw Exception("f");
     }
   }
+  Future<bool> idUnique2(String id)async{
+    try{
+      QuerySnapshot x=await _db.collection('compactInventory').get();
+      for(var doc in x.docs){
+        if(doc.get("itemId")==id){
+          return true;
+        }
+      }
+      return false;
+    }
+    catch(e){
+      throw Exception(e.toString());
+    }
+  }
+  Future<void> addItem2(CompactInventory inv)async{
+
+    try{
+      await _db.collection('compactInventory').add(inv.toMap());
+    }
+    catch(e){
+      throw Exception("rrr");
+    }
+  }
 
 
 }

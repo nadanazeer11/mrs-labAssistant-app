@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
@@ -28,11 +29,16 @@ class _CreateUState extends State<CreateU> {
     debugPrint("f");
     final isValid=_formU.currentState!.validate();
     if(isValid){
+      setState(() {
+        emailTaken=false;
+        userNameTaken=false;
+
+      });
       bool username;
       bool email;
       bool result;
-      Userr user=new Userr(name:_usernameController.text,
-          email: _emailController.text,
+      Userr user=new Userr(name:_usernameController.text.trim().toLowerCase(),
+          email: _emailController.text.trim().toLowerCase(),
           password:_passwordController.text,
           projects: [],tasks: [],createP:CreateP,
           addU:CreateU,inventoryM: inventoryM);
@@ -41,8 +47,8 @@ class _CreateUState extends State<CreateU> {
         setState(() {
           _loading=true;
         });
-        email=await authenticate.emailCheck(_emailController.text);
-        username=await authenticate.userNameCheck(_usernameController.text);
+        email=await authenticate.emailCheck(_emailController.text.trim().toLowerCase());
+        username=await authenticate.userNameCheck(_usernameController.text.trim().toLowerCase());
         if(email){
           debugPrint("email taken");
           setState(() {
@@ -163,7 +169,10 @@ class _CreateUState extends State<CreateU> {
                 FractionallySizedBox(
                 widthFactor: 0.8,
                 child: TextFormField(
-                controller: _emailController,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                    ],
+                controller: _emailController, keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'Enter Users Email',
@@ -186,14 +195,17 @@ class _CreateUState extends State<CreateU> {
                   child: TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: 'UserName',
-                      hintText: 'Enter Users UserName',
+                      labelText: 'Username',
+                      hintText: 'Enter Users Username',
                       border: OutlineInputBorder(
                       ),
                     ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                      ],
                       validator:(value) {
-                        if (value!.isEmpty) {
-                          return "Please enter a userName";
+                        if (value!.trim().isEmpty) {
+                          return "Please enter a username";
                         }
                           return null;
                       }
@@ -213,6 +225,9 @@ class _CreateUState extends State<CreateU> {
                       border: OutlineInputBorder(
                       ),
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                    ],
                   validator: (value){
                       if(value!.isEmpty || value.length<6){
                         return "Password should be at least 6 characters";

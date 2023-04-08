@@ -25,6 +25,7 @@ class _OurProjectsState extends State<OurProjects> {
 
   bool isLoading=true;
   bool isTrue = false;
+  bool _isMounted = false;
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
@@ -287,54 +288,55 @@ class _OurProjectsState extends State<OurProjects> {
 
   }
 
-
+  @override
+  void dispose() {
+    _isMounted = false;
+    super.dispose();
+  }
 
   @override
   void initState() {
+    super.initState();
+    _isMounted = true;
     _loadData();
     // homeC.updateIsLate();
   }
   void _loadData()async{
-    setState(() {
-      isLoading=true;
-    });
-    try {
-      String x=await getLoggedInName();
-
+    if (_isMounted) {
       setState(() {
-        loggedInName=x;
-      });
-      setState(() {
-        isLoading=true;
+        isLoading = true;
       });
       try {
-        setState(() {
-          isLoading=true;
-        });
-        String x=await getIdofUser();
-        setState(() {
-          loggedInId=x;
-          isTrue=true;
-          isLoading=false;
+        String x = await getLoggedInName();
 
+        setState(() {
+          loggedInName = x;
         });
-
+        setState(() {
+          isLoading = true;
+        });
+        try {
+          setState(() {
+            isLoading = true;
+          });
+          String x = await getIdofUser();
+          setState(() {
+            loggedInId = x;
+            isTrue = true;
+            isLoading = false;
+          });
+        }
+        catch (e) {
+          setState(() {
+            isLoading = false;
+          });
+        }
       }
-      catch(e){
+      catch (e) {
         setState(() {
-          isLoading=false;
-
+          isLoading = false;
         });
-
       }
-
-    }
-    catch(e){
-      setState(() {
-        isLoading=false;
-
-      });
-
     }
 
   }

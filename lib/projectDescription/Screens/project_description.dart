@@ -212,7 +212,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                               children: [
                                 Text( '${project?.title ?? 'N/A'}',style:TextStyle(fontSize: 29,fontWeight: FontWeight.w500,color: Colors.black87,fontStyle: FontStyle.normal)),
                                 SizedBox(height: 12,),
-                                SizedBox(height: 12,),
+                                // SizedBox(height: 12,),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -224,7 +224,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                           children: <TextSpan>[
                                             TextSpan(
                                               text:'${project?.createdBy ?? 'N/A'}',
-                                              style: TextStyle(fontWeight: FontWeight.w400, color: AppColorss.darkmainColor),
+                                              style: TextStyle(fontWeight: FontWeight.w400, color: Colors.grey[600]),
                                             ),
 
                                           ],
@@ -251,15 +251,6 @@ class _ProjDescripState extends State<ProjDescrip> {
                             PopupMenuButton<String>(
                               icon: Icon(Icons.people),
                               itemBuilder: (BuildContext context) {
-                                // if (project?.users != null) {
-                                //
-                                //   return project!.users.map((String option) {
-                                //     return PopupMenuItem<String>(
-                                //       value: option,
-                                //       child: Text(option),
-                                //     );
-                                //   }).toList();
-                                // }
                                 debugPrint("empty");
                                 if (project?.users != null) {
                                   if (project!.users.isEmpty) {
@@ -294,7 +285,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 ),
                                 Text(
                                   "Description",
-                                  style: TextStyle(fontWeight: FontWeight.w400,fontSize: 22,color: Color(0xFF36454F)),
+                                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),
                                 ),
                                 const SizedBox(
                                   height: 8,
@@ -317,6 +308,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                   ],
                 );
 
+              }
+              if (snapshot.connectionState == ConnectionState.waiting){
+                return Center(child: CircularProgressIndicator(),);
               }
                 return Center(
                     child: Text(
@@ -483,7 +477,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                                        switchPublic=false;
                                        addMyComment=false;
                                        url="";
+
                                       });
+                                      _notesText.clear();
                                     }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: AppColorss.redColor),)),
                                     sendButton==true?TextButton(onPressed: ()async {
                                       setState(() {

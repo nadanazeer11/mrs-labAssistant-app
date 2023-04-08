@@ -28,6 +28,7 @@ class _HPState extends State<HP> {
   var _oldPassContr=TextEditingController();
   var _newPassContr=TextEditingController();
   Authenticate authenticate=Authenticate();
+  bool _isMounted = false;
   InventContr invC=InventContr();
   final changeP=GlobalKey<FormState>();
   Future<bool> _submitChangeP()async{
@@ -114,6 +115,11 @@ class _HPState extends State<HP> {
   bool ?createU;
   bool ?inventoryM;
   String? loggedInId;
+  bool isLoading = true;
+  bool isTrue = false;
+  String loggedInName = "";
+
+
   static final List <Widget> widgetOptions=<Widget>[
     OurProjects(),
     Inventory5()
@@ -128,6 +134,9 @@ class _HPState extends State<HP> {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+
     return
       Scaffold(
       appBar:
@@ -141,10 +150,40 @@ class _HPState extends State<HP> {
           }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
-      body: SingleChildScrollView(
+      body: isLoading!=true && isTrue==true?SingleChildScrollView(
         child: widgetOptions[indexx],
+      ):isLoading==true?Center(
+        child: CircularProgressIndicator(),
+      ):
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: w * 0.12,
+              height: h * 0.12,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/warning.png"),
+                  // fit:BoxFit.fill
+                ),
+              ),
+            ),
+            Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+            Text(
+              "in getting user data.",
+              style: TextStyle(fontSize: 20),
+            ),
+            Text(
+              "please try logging out!",
+              style: TextStyle(fontSize: 20),
+            )
+          ],
+        ),
       ),
-      floatingActionButton:inventoryM==true&& indexx==1? FloatingActionButton.extended(onPressed: () {
+
+      floatingActionButton:isLoading!=true&& isTrue==true?inventoryM==true&& indexx==1? FloatingActionButton.extended(onPressed: () {
         Navigator.pushNamed(context, '/addItem');
       },
         elevation: 10,
@@ -153,7 +192,7 @@ class _HPState extends State<HP> {
         label:Text("Add"),
         icon: Icon(Icons.add,color: Colors.white,),
 
-      ):null,
+      ):null : null,
       bottomNavigationBar: BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       onTap: onItemTapped,
@@ -174,39 +213,61 @@ class _HPState extends State<HP> {
      drawer: Drawer(
         child:  Column(
           children: [
-            Text("id ${loggedInId}"),
+            // Text("id ${loggedInId}"),
             Expanded(
               child: Container(
-                color: AppColorss.darkmainColor,
+                // color: AppColorss.darkmainColor,
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    const DrawerHeader(
+                     DrawerHeader(
                       decoration: BoxDecoration(
                         //color: Colors.blue,
                       ),
-                      child: Text('Drawer Header'),
+                      child:     Container(
+                        width: w,
+                        height: h * 0.3,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage("assets/mrsrb.png"),
+                            // fit:BoxFit.fill
+                          ),
+                        ),
+                      ),
                     ),
-                    createU==true?ListTile(
-                      title:const Text('Create User',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
-                      leading: Icon(FeatherIcons.user,color: Colors.white,size: 30,),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/createU');
-                      },
-                    ):Container(),
                     Divider(
                       height: 4,
                       color: Colors.black,
                     ),
-                    createP==true?ListTile(
-                      title:const Text('Create Project',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.white),),
-                      leading: Icon(FeatherIcons.folder,color: Colors.white,size: 30,),
+                    ListTile (
+                      title: Text('$loggedInName',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.black),),
+                      leading: Icon(Icons.alternate_email,color: Colors.black,size: 30,),
+
+                    ),
+                    Divider(
+                      height: 4,
+                      color: Colors.black,
+                    ),
+                    isLoading!=true&& isTrue==true? createU==true?ListTile(
+                      title:const Text('Create User',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.black),),
+                      leading: Icon(FeatherIcons.user,color: Colors.black,size: 30,),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/createU');
+                      },
+                    ):Container():Container(child:Text("error load again")),
+                    Divider(
+                      height: 4,
+                      color: Colors.black,
+                    ),
+                    isLoading!=true&& isTrue==true?createP==true?ListTile (
+                      title:const Text('Create Project',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.black),),
+                      leading: Icon(FeatherIcons.folder,color: Colors.black,size: 30,),
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/addProject');
                       },
-                    ):Container(),
+                    ):Container():Container(child:Text("error load again")),
                     Divider(
                       height: 4,
                       color: Colors.black,
@@ -441,11 +502,13 @@ class _HPState extends State<HP> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _isMounted = true;
+    _loadData2();
 
   }
   void dispose() {
     // cancel any async operations here
+    _isMounted = false;
     super.dispose();
   }
   void _loadData()async{
@@ -455,7 +518,89 @@ class _HPState extends State<HP> {
     await _createU();
     await _inventoryM();
 
+
   }
+ void _loadData2() async{
+   if (_isMounted) {
+     setState(() {
+       isLoading = true;
+     });
+     try {
+       String x = await getIdofUser();
+       debugPrint("ana f your projects $x ");
+       debugPrint("logged in id $x");
+       setState(() {
+         loggedInId = x;
+       });
+       try {
+         setState(() {
+           isLoading = true;
+         });
+         bool x = await hmc.isCreateP(loggedInId);
+         setState(() {
+           createP = x;
+         });
+         debugPrint("f$createP");
+         try {
+           setState(() {
+             isLoading = true;
+           });
+           bool x = await hmc.isCreateU(loggedInId);
+           setState(() {
+             createU = x;
+           });
+           debugPrint("f$createU");
+           try {
+             setState(() {
+               isLoading = true;
+             });
+             bool x = await hmc.isInventoryM(loggedInId);
+             setState(() {
+               inventoryM = x;
+             });
+             debugPrint("finished loading the home screen");
+             try {
+               String name = await getLoggedInName();
+               setState(() {
+                 loggedInName = name;
+                 isTrue = true;
+                 isLoading = false;
+               });
+               debugPrint("inventoryM $inventoryM");
+             }
+             catch (e) {
+               setState(() {
+                 isLoading = false;
+               });
+             }
+           }
+           catch (e) {
+             setState(() {
+               isLoading = false;
+             });
+           }
+         }
+         catch (e) {
+           setState(() {
+             isLoading = false;
+           });
+         }
+       }
+       catch (e) {
+         setState(() {
+           isLoading = false;
+         });
+       }
+     }
+     catch (e) {
+       setState(() {
+         isLoading = false;
+       });
+     }
+   }
+ }
+
+
   Future<void> _getLoggedInId() async{
     try {
       String x=await getIdofUser();

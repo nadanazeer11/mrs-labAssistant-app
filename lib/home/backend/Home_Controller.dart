@@ -266,14 +266,12 @@ class HomeContr{
      final now=DateTime.now();
      try {
        debugPrint("update isLate");
-       // QuerySnapshot q = await _db.collection('projects')
-       //     .where('endDate', isLessThanOrEqualTo: Timestamp.fromDate(now)).get();
-       //     // .where('isDone', isEqualTo: false)
-       //     // .get();
        QuerySnapshot q1 = await FirebaseFirestore.instance
            .collection('projects')
            .where('endDate', isLessThan: Timestamp.fromDate(now))
            .get();
+       debugPrint("length of laatde ${q1.size}");
+
 
        QuerySnapshot q2 = await FirebaseFirestore.instance
            .collection('projects')
@@ -282,7 +280,7 @@ class HomeContr{
 
        List<DocumentSnapshot> docs = q1.docs.where((doc) =>
            q2.docs.any((doc2) => doc2.id == doc.id)).toList();
-       debugPrint("length ${docs.length}");
+       debugPrint("length of laate ${docs.length}");
        for(var x in docs){
            await _db.collection('projects').doc(x.id).update({
              'isLate': true,

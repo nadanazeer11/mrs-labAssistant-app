@@ -25,4 +25,17 @@ class CompactInventory{
         required this.deathReason,
         required this.description
       });
+  Map<String, dynamic> toMap() {
+    return {
+      'itemId': itemId,
+      'itemName': itemName,
+      'status': status,
+      'creationDate': creationDate,
+      'createdBy':createdBy,
+      'deathDate':deathDate,
+      'administeredBy':administeredBy,
+      'deathReason':deathReason,
+       'description':description
+    };
+  }
 }

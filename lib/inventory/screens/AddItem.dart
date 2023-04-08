@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:mrs/models/CompactInventory.dart';
 import 'package:mrs/models/Inventory.dart';
 import 'package:intl/intl.dart';
 import '../../common.dart';
@@ -32,7 +33,13 @@ class _AddItemState extends State<AddItem> {
  var _idController2=TextEditingController();
  bool popUpLoading=false;
  bool textLoading=false;
+ String initialValue="loose";
 
+ final _formU3=GlobalKey<FormState>();
+ var _nameController3=TextEditingController();
+ var _idController3=TextEditingController();
+ var _descriptionController=TextEditingController();
+ bool compactLoading=false;
 
  @override
   Widget build(BuildContext context) {
@@ -55,75 +62,188 @@ class _AddItemState extends State<AddItem> {
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            Text("Add Item",style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: Colors.black87),),
+            Row(
+              children: [
+                Text("Add Item",style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: Colors.black87),),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child:
+                    PopupMenuButton(
+                      initialValue: initialValue,
+                      icon: Icon(
+                        Icons.arrow_drop_down_circle_outlined,
+                        color: AppColorss.fontGrey,
+                      ),
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem(
+                          value: "loose",
+                          child: Text('Loose'),
+                        ),
+                        const PopupMenuItem(
+                          value: "compact",
+                          child: Text("Compact"),
+                        ),
+                      ],
+                      // color: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onSelected: (value) {
+                        debugPrint('your p$value');
+                        setState(() {
+                          initialValue = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
             Container(
             height: screenHeight*0.009,
             width: screenWidth*0.4,
             color: AppColorss.darkmainColor,
           ),
             SizedBox(height: screenHeight*0.02,),
-            Text("Choose from Existing Items :",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:AppColorss.darkFontGrey),),
-            SizedBox(height: screenHeight*0.02,),
-            Center(
-              child: Container(
-                child:    Column(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width:screenWidth*0.6,
-                          child: TextField(
-                            controller: searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search using name...',
-                              prefixIcon:searchWord==null? IconButton(onPressed: (){
-                                setState(() {
-                                  searchWord=searchController.text;
-                                });
-                              },icon: Icon(Icons.search),): IconButton(onPressed: (){
-                                setState(() {
-                                  searchWord=null;
-                                  searchController.clear();
-                                });
-                              },icon: Icon(Icons. clear),),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: BorderSide.none,
+            initialValue=="loose"?
+                Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text("Choose from Existing Items :",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:AppColorss.darkFontGrey),),
+              SizedBox(height: screenHeight*0.02,),
+              Center(
+                child: Container(
+                  child:    Column(
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            width:screenWidth*0.6,
+                            child: TextField(
+                              controller: searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search using name...',
+                                prefixIcon:searchWord==null? IconButton(onPressed: (){
+                                  setState(() {
+                                    searchWord=searchController.text;
+                                  });
+                                },icon: Icon(Icons.search),): IconButton(onPressed: (){
+                                  setState(() {
+                                    searchWord=null;
+                                    searchController.clear();
+                                  });
+                                },icon: Icon(Icons. clear),),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                contentPadding: EdgeInsets.all(8),
                               ),
-                              filled: true,
-                              contentPadding: EdgeInsets.all(8),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: screenHeight*0.02,),
-                    ScrollableWidget(child: buildTable()),
-                  ],
+                        ],
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      ScrollableWidget(child: buildTable()),
+                    ],
+                  ),
                 ),
               ),
-            ),
-                SizedBox(height:screenHeight*0.02,),
-                Center(
+              SizedBox(height:screenHeight*0.02,),
+              Center(
                   child:Text("OR",style:TextStyle(fontSize: 22,fontWeight: FontWeight.bold,decoration: TextDecoration.underline ))
-                ),
-                SizedBox(height:screenHeight*0.02,),
-                Text("Enter new Item:",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:AppColorss.darkFontGrey),),
-                SizedBox(height:screenHeight*0.02,),
-                Form(
-                    key:_formU,
-                    child:Center(
+              ),
+              SizedBox(height:screenHeight*0.02,),
+              Text("Enter new Item:",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:AppColorss.darkFontGrey),),
+              SizedBox(height:screenHeight*0.02,),
+              Form(
+                  key:_formU,
+                  child:Center(
+                    child: Column(children: [
+                      FractionallySizedBox(
+                        widthFactor: 0.8,
+                        child: TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Name',
+                              hintText: 'Enter items name',
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color:Color(0xFF005466))
+                              ),
+                            ),
+                            validator:(value) {
+                              if (value!.trim().isEmpty) {
+                                return "Please enter a name";
+                              }
+                              return null;
+                            }
+                        ),
+
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      FractionallySizedBox(
+                        widthFactor: 0.8,
+                        child: TextFormField(
+                            controller: _idController,
+                            decoration: const InputDecoration(
+                              labelText: 'Id',
+                              hintText: "Enter item's id",
+                              border: OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color:Color(0xFF005466))
+                              ),
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(new RegExp(r"\s"))
+                            ],
+                            validator:(value) {
+                              if (value!.trim().isEmpty) {
+                                return "Please enter an id";
+                              }
+                              return null;
+                            }
+                        ),
+
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      textLoading==true? CircularProgressIndicator() : ElevatedButton(onPressed: (){
+                        _addItem(_idController.text.trim(),_nameController.text.trim());
+
+                      }, child:Text("Add",),   style: ElevatedButton.styleFrom(
+                          backgroundColor:AppColorss.lightmainColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          minimumSize: Size(100, 30)
+                      ),)
+                    ]),
+                  )
+              ),
+            ],):
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                  Text("Create new compact item :",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,color:AppColorss.darkFontGrey),),
+                    SizedBox(height: screenHeight*0.02,),
+                    Form(
+                      key:_formU3,
+                      child:Center(
                         child: Column(children: [
                           FractionallySizedBox(
                             widthFactor: 0.8,
                             child: TextFormField(
-                                controller: _nameController,
+                                controller: _nameController3,
                                 decoration: const InputDecoration(
                                   labelText: 'Name',
                                   hintText: 'Enter items name',
                                   border: OutlineInputBorder(),
                                   focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color:Color(0xFF005466))
+                                      borderSide: BorderSide(color:Color(0xFF005466))
                                   ),
                                 ),
                                 validator:(value) {
@@ -139,7 +259,7 @@ class _AddItemState extends State<AddItem> {
                           FractionallySizedBox(
                             widthFactor: 0.8,
                             child: TextFormField(
-                                controller: _idController,
+                                controller: _idController3,
                                 decoration: const InputDecoration(
                                   labelText: 'Id',
                                   hintText: "Enter item's id",
@@ -161,8 +281,31 @@ class _AddItemState extends State<AddItem> {
 
                           ),
                           SizedBox(height: screenHeight*0.02,),
-                         textLoading==true? CircularProgressIndicator() : ElevatedButton(onPressed: (){
-                            _addItem(_idController.text.trim(),_nameController.text.trim());
+                          FractionallySizedBox(
+                            widthFactor: 0.8,
+                            child: TextFormField(
+                                controller: _descriptionController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Description',
+                                  hintText: "Enter item's description",
+                                  border: OutlineInputBorder(),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color:Color(0xFF005466))
+                                  ),
+                                ),
+                                validator:(value) {
+                                  if (value!.trim().isEmpty) {
+                                    return "Please enter a description";
+                                  }
+                                  return null;
+                                }
+                            ),
+
+                          ),
+                          SizedBox(height: screenHeight*0.02,),
+                          compactLoading==true? CircularProgressIndicator() : ElevatedButton(onPressed: (){
+
+                            _addCompactItem(_idController3.text.trim(),_nameController3.text.trim(),_descriptionController.text.trim());
 
                           }, child:Text("Add",),   style: ElevatedButton.styleFrom(
                               backgroundColor:AppColorss.lightmainColor,
@@ -172,8 +315,12 @@ class _AddItemState extends State<AddItem> {
                               minimumSize: Size(100, 30)
                           ),)
                         ]),
-                    )
-                ),
+                      )
+                  ),
+
+                ],)
+
+
               ]),
 
 
@@ -485,7 +632,99 @@ class _AddItemState extends State<AddItem> {
     }
 
   }
+  Future<void> _addCompactItem(String id,String name,String description) async{
+    final isValid=_formU3.currentState!.validate();
+    if(isValid){
+      try{
+        setState(() {
+          compactLoading=true;
+        });
+        bool x=await invC.idUnique2(id.toLowerCase().trim());
+        if(x){
+          setState(() {
+            compactLoading=false;
+          });
+          showPlatformDialog(
+            context: context,
+            builder: (context) => BasicDialogAlert(
+              title: Text("Authentication Error"),
+              content:
+              Text("Id already exists"),
+              actions: <Widget>[
+                BasicDialogAction(
+                  title: Text("OK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+        else{
+          try{
+            CompactInventory inv=CompactInventory(
+              itemId:id.toLowerCase().trim(),
+              itemName: name.toLowerCase().trim(),
+              status:"Available",
+              createdBy:loggedInName?? "Omar",
+              creationDate: Timestamp.fromDate(DateTime.now()),
+              administeredBy: "",
+              deathDate: "",
+              deathReason: "",
+              description: description,
+            );
+            await invC.addItem2(inv);
+            setState(() {
+              compactLoading=false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Item successfully created!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            _idController3.clear();
+            _nameController3.clear();
+            _descriptionController.clear();
+          }
+          catch(e){
+            setState(() {
+              compactLoading=false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error Creating item,try again!'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      }
+      catch(e){
+        setState(() {
+          compactLoading=false;
+        });
+        showPlatformDialog(
+          context: context,
+          builder: (context) => BasicDialogAlert(
+            title: Text("Error Occured"),
+            content:
+            Text(e.toString()),
+            actions: <Widget>[
+              BasicDialogAction(
+                title: Text("OK"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      }
 
+    }
+  }
  @override
   void initState() {
     super.initState();

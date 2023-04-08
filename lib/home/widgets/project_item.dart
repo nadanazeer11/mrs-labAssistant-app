@@ -4,6 +4,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:mrs/config/colors.dart';
 import 'package:mrs/models/Project.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:intl/intl.dart';
 
 import '../../common.dart';
 import '../../models/Project.dart';
@@ -46,6 +47,10 @@ class _Project_itemState extends State<Project_item> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime n=widget.project?.endDate.toDate() ?? DateTime.now();
+    String x=DateFormat(
+        'dd/MM/yy')
+        .format(n);
 
       return Card(
       elevation: 8,
@@ -65,7 +70,7 @@ class _Project_itemState extends State<Project_item> {
         subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,children: [
               Icon(Icons.linear_scale_outlined,color: AppColorss.darkmainColor,)
-              , Text('Deadline:1/3/2022',style:TextStyle(fontSize: 16),),
+              , Text('Deadline:${x}',style:TextStyle(fontSize: 16),),
         ]),
         trailing:loggedInName==widget.project?.createdBy ? PopupMenuButton(
           itemBuilder: (BuildContext context)=>[
