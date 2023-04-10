@@ -76,6 +76,7 @@ class _CreateUState extends State<CreateU> {
                   _loading=false;
                   CreateU=false;
                   CreateP=false;
+                  inventoryM=false;
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

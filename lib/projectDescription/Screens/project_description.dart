@@ -34,7 +34,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   List<String>? languages;
   String langCode = "en-US";
   HomeContr homeC=HomeContr();
-  ProjectDContr pdc=new ProjectDContr();
+  ProjectDContr pdc=ProjectDContr();
   DateTime Start= DateTime.now();
   String loggedInName="";
   String? loggedInId;
@@ -52,6 +52,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   bool switchPublic=false;
   String url="";
   bool sendButton=true;
+  bool stop=false;
 
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
@@ -117,41 +118,44 @@ class _ProjDescripState extends State<ProjDescrip> {
       try{
         DateTime x=DateTime.now();
         bool z=isSelected[0]==true ? true : false;
-        if(url=="" || fileName=="No file Selected"){
-          Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
-          await pdc.addNote(note,id);
-          setState(() {
+        if(stop==false){
+          if(url=="" || fileName=="No file Selected"){
+            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
+            await pdc.addNote(note,id);
             setState(() {
-              fileName="No file Selected";
-              file=null;
-              task=null;
-              switchPublic=false;
-              addMyComment=false;
-              url="";
+              setState(() {
+                fileName="No file Selected";
+                file=null;
+                task=null;
+                switchPublic=false;
+                addMyComment=false;
+                url="";
+              });
             });
-          });
-        }
-        else if(url != "" && fileName!="No file Selected"){
-          Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
-          await pdc.addNote(note,id);
-          setState(() {
+          }
+          else if(url != "" && fileName!="No file Selected"){
+            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
+            await pdc.addNote(note,id);
             setState(() {
-              fileName="No file Selected";
-              file=null;
-              task=null;
-              switchPublic=false;
-              addMyComment=false;
-              url="";
+              setState(() {
+                fileName="No file Selected";
+                file=null;
+                task=null;
+                switchPublic=false;
+                addMyComment=false;
+                url="";
+              });
             });
-          });
 
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Note successfully uploaded!'),
+              backgroundColor: Colors.green,
+            ),
+          );
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Note successfully uploaded!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+
 
       }
       catch(e){
@@ -164,6 +168,12 @@ class _ProjDescripState extends State<ProjDescrip> {
       }
     }
     catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('An error occurred while uploading the file'),
+          backgroundColor: Colors.red,
+        ),
+      );
 
     }
 
@@ -210,8 +220,8 @@ class _ProjDescripState extends State<ProjDescrip> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text( '${project?.title ?? 'N/A'}',style:TextStyle(fontSize: 29,fontWeight: FontWeight.w500,color: Colors.black87,fontStyle: FontStyle.normal)),
-                                SizedBox(height: 12,),
+                                Text( project?.title ?? 'N/A',style:const TextStyle(fontSize: 29,fontWeight: FontWeight.w500,color: Colors.black87,fontStyle: FontStyle.normal)),
+                                const SizedBox(height: 12,),
                                 // SizedBox(height: 12,),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -220,10 +230,10 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       child: Text.rich(
                                         TextSpan(
                                           text: 'Created By: ',
-                                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                                          style: const TextStyle(fontSize: 18, color: Colors.grey),
                                           children: <TextSpan>[
                                             TextSpan(
-                                              text:'${project?.createdBy ?? 'N/A'}',
+                                              text:project?.createdBy ?? 'N/A',
                                               style: TextStyle(fontWeight: FontWeight.w400, color: Colors.grey[600]),
                                             ),
 
@@ -236,8 +246,8 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: Row(
                                         children: [
-                                          Icon(Icons.add_alert_sharp,color: Colors.red,),
-                                          Text('$endDate',style: TextStyle(fontSize:20),),
+                                          const Icon(Icons.add_alert_sharp,color: Colors.red,),
+                                          Text(endDate,style: const TextStyle(fontSize:20),),
 
                                         ],
                                       ),
@@ -247,15 +257,15 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 ),
                                 Row(
                                   children: [
-                                    Text("Contributers",style:TextStyle(fontSize: 20,fontWeight: FontWeight.w400)),
+                                    const Text("Contributors",style:TextStyle(fontSize: 20,fontWeight: FontWeight.w400)),
                             PopupMenuButton<String>(
-                              icon: Icon(Icons.people),
+                              icon: const Icon(Icons.people),
                               itemBuilder: (BuildContext context) {
                                 debugPrint("empty");
                                 if (project?.users != null) {
                                   if (project!.users.isEmpty) {
                                     return [
-                                      PopupMenuItem<String>(
+                                      const PopupMenuItem<String>(
                                         value: null,
                                         child: Text('No users available'),
                                       ),
@@ -283,7 +293,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                     color: Colors.blue,
                                   ),
                                 ),
-                                Text(
+                                const Text(
                                   "Description",
                                   style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),
                                 ),
@@ -291,7 +301,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                   height: 8,
                                 ),
                                 Text(
-                                    '${project?.description ?? 'N/A'}',
+                                    project?.description ?? 'N/A',
                                     style: TextStyle(color:AppColorss.fontGrey,fontSize: 18)
                                 ),
 
@@ -310,9 +320,9 @@ class _ProjDescripState extends State<ProjDescrip> {
 
               }
               if (snapshot.connectionState == ConnectionState.waiting){
-                return Center(child: CircularProgressIndicator(),);
+                return const Center(child: CircularProgressIndicator(),);
               }
-                return Center(
+                return const Center(
                     child: Text(
                       'Something went wrong',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
@@ -353,13 +363,14 @@ class _ProjDescripState extends State<ProjDescrip> {
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
-                          Text("Notes:",style: TextStyle(fontSize: 21,fontWeight: FontWeight.w500,color: Colors.white),),
-                          IconButton(onPressed: (){
+                          const Text("Notes:",style: TextStyle(fontSize: 21,fontWeight: FontWeight.w500,color: Colors.white),),
+                          allow==true?IconButton(onPressed: (){
                             setState(() {
                               addMyComment=true;
                               sendButton=true;
+                              stop=false;
                             });
-                          }, icon: Icon(Icons.add))
+                          }, icon: const Icon(Icons.add)):Container(),
                         ],
                       ),
                     ),
@@ -392,7 +403,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                   padding: const EdgeInsets.fromLTRB(8,8,0,0),
                                   child: Row(
                                     children: [
-                                      Text("Your note",style: TextStyle(fontWeight: FontWeight.w600,color: Colors.black,fontSize: 18),),
+                                      const Text("Your note",style: TextStyle(fontWeight: FontWeight.w600,color: Colors.black,fontSize: 18),),
                                       Expanded(
                                         child: Align(
                                           alignment:Alignment.bottomLeft,
@@ -425,7 +436,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       controller: _notesText,
                                       maxLines: null,
                                       keyboardType: TextInputType.multiline,
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                                         hintText: 'Add a comment',
                                         border: InputBorder.none,
@@ -442,16 +453,14 @@ class _ProjDescripState extends State<ProjDescrip> {
                                         upload=true;
                                       });
                                     }
-                                  }, icon: Icon(FeatherIcons.paperclip,),color: Colors.black,),
+                                  }, icon: const Icon(FeatherIcons.paperclip,),color: Colors.black,),
                                   Expanded(
                                     child: Text(
                                       fileName,
                                       style: TextStyle(fontSize: 16, color: AppColorss.fontGrey),
                                     ),
                                   ),
-                                  // fileName!="No file Selected"  && task==null ?      IconButton(onPressed: (){
-                                  //   uploadFile(context);
-                                  // }, icon:Icon(FeatherIcons.upload)):Container(),
+
                                   fileName!="No file Selected" ? IconButton(onPressed: (){
                                     setState(() {
                                       fileName="No file Selected";
@@ -459,7 +468,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       upload=false;
                                       url="";
                                     },);
-                                  }, icon: Icon(Icons.delete),color: AppColorss.redColor,):Container(),
+                                  }, icon: const Icon(Icons.delete),color: AppColorss.redColor,):Container(),
 
                                 ],),
                                 task!=null ? Padding(
@@ -477,6 +486,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                        switchPublic=false;
                                        addMyComment=false;
                                        url="";
+                                       stop=true;
 
                                       });
                                       _notesText.clear();
@@ -493,7 +503,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                         _notesText.clear();
                                       });
                                       debugPrint("boolean $sendButton");
-                                    }, child:Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)):Container(),
+                                    }, child:const Text("Send",style: TextStyle(fontSize: 18,color: Colors.black),)):Container(),
                                   ],
                                 )
 
@@ -502,7 +512,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                         ),
                     ),
                   ):Container(),
-                    SizedBox(height: 15,),
+                    const SizedBox(height: 15,),
 
 
                     steps(context,ids),
@@ -538,7 +548,7 @@ class _ProjDescripState extends State<ProjDescrip> {
       future:pdc.getNotes(ids),
       builder: (context,snapshot){
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if(snapshot.hasData){
           List<Notes>? projNotes=snapshot.data;
@@ -560,7 +570,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                   padding: const EdgeInsets.fromLTRB(4,0,3,27),
                   child:
                   Container(
-                      margin:EdgeInsets.fromLTRB(4, 0, 3, 0),
+                      margin:const EdgeInsets.fromLTRB(4, 0, 3, 0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         color: Colors.white,
@@ -581,12 +591,12 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children:[
                                   Icon(Icons.access_time_sharp,size: 15,color: AppColorss.darkFontGrey,),
-                                  Text('${ time},${datee}',style: TextStyle(fontSize: 14,color: AppColorss.fontGrey),),
+                                  Text('$time,$datee',style: TextStyle(fontSize: 14,color: AppColorss.fontGrey),),
                                 ]),
-                            SizedBox(height:3),
+                            const SizedBox(height:3),
                             Row(
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   radius: 21,
                                   // add avatar image or tex
                                 ),
@@ -594,8 +604,8 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 Expanded(
                                   child: SizedBox(
                                     child: Text(
-                                      '${projNotes?[index].note?? 'N/A'}',
-                                      style: TextStyle(fontSize: 16,color: Colors.black),
+                                      projNotes?[index].note?? 'N/A',
+                                      style: const TextStyle(fontSize: 16,color: Colors.black),
                                     ),
                                   ),
                                 ),
@@ -642,7 +652,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       }
 
                                     },
-                                    child: Text("$baseNamee",style: TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
+                                    child: Text("$baseNamee",style: const TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
                               ],
                             )
                           ],
@@ -652,10 +662,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                 );
 
               }
-              else{
-                return Container();
-              }
-
+              return Container();
             },
 
           );

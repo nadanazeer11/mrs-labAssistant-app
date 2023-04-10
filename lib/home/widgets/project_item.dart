@@ -32,18 +32,6 @@ class _Project_itemState extends State<Project_item> {
     _getLoggedInName();
   }
 
-  // void _showMultiSelect  ()async {
-  //   List<String> res = await showDialog(context: context, builder:
-  //       (BuildContext) {
-  //     // return MultiSelect(items:items,);
-  //     return MultiSelect(items: items, preSelectedItems: _selectedItems);
-  //   });
-  //   if (items != null) {
-  //     setState(() {
-  //       _selectedItems = res;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -197,19 +185,20 @@ class _Project_itemState extends State<Project_item> {
       debugPrint("empty $res");
       if(res!=null){
         await homeC.editUsers(res,users,widget.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully updated contributers'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated contributers'),
-          backgroundColor: Colors.green,
-        ),
-      );
+
 
       // debugPrint("${res.join(',')}");
       }
     catch(e){
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Update error occurred.Please try again!'),
           backgroundColor: Colors.red,
         ),

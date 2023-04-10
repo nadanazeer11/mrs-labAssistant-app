@@ -103,6 +103,7 @@ class _OurProjectsState extends State<OurProjects> {
                             setState(() {
                               filter=value;
                             });
+                            debugPrint("filtering with $value");
                           },
                         ),
                         SizedBox(width: 10,),
@@ -137,9 +138,9 @@ class _OurProjectsState extends State<OurProjects> {
                               if(project?.isLate!=null){
                                 if(project?.isLate==true){
 
-                                  setState(() {
-                                    late=true;
-                                  });
+                                  // setState(() {
+                                  //   late=true;
+                                  // });
                                   return Column(
                                     children: [
                                       Project_item(id: project?.id,project:project),
@@ -285,7 +286,6 @@ class _OurProjectsState extends State<OurProjects> {
       debugPrint("hey ya nado");
       return Center(child:CircularProgressIndicator());
     }
-
   }
 
   @override
@@ -297,12 +297,12 @@ class _OurProjectsState extends State<OurProjects> {
   @override
   void initState() {
     super.initState();
-    _isMounted = true;
+    // _isMounted = true;
     _loadData();
     // homeC.updateIsLate();
   }
   void _loadData()async{
-    if (_isMounted) {
+
       setState(() {
         isLoading = true;
       });
@@ -339,7 +339,7 @@ class _OurProjectsState extends State<OurProjects> {
       }
     }
 
-  }
+
 
 
 }
