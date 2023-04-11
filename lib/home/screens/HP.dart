@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mrs/authentication/backend/authenticate.dart';
 import 'package:mrs/config/colors.dart';
 import 'package:mrs/home/backend/Home_Controller.dart';
@@ -12,6 +17,7 @@ import '../../common.dart';
 import '../../config/text_styles.dart';
 import '../../inventory/backend/inventContr.dart';
 import '../../inventory/screens/inventory5.dart';
+import 'package:http/http.dart' as http;
 
 
 class HP extends StatefulWidget {
@@ -118,8 +124,9 @@ class _HPState extends State<HP> {
   bool isLoading = true;
   bool isTrue = false;
   String loggedInName = "";
-
-
+  late AndroidNotificationChannel channel;
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  String? token = " ";
   static final List <Widget> widgetOptions=<Widget>[
     OurProjects(),
     Inventory5()
@@ -130,6 +137,87 @@ class _HPState extends State<HP> {
       indexx=index;
       debugPrint("the index$index");
     });
+  }
+  void getToken() async {
+    await FirebaseMessaging.instance.getToken().then(
+            (token) {
+              debugPrint("my token is $token");
+          setState(() {
+            token = token;
+          });
+        }
+    );
+  }
+  void loadFCM() async {
+    if (!kIsWeb) {
+      channel =  AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // t
+        importance: Importance.high,
+        enableVibration: true,
+      );
+
+      flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+      /// Create an Android Notification Channel.
+      ///
+      /// We use this channel in the `AndroidManifest.xml` file to override the
+      /// default FCM channel to enable heads up notifications.
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+
+      /// Update the iOS foreground notification presentation options to allow
+      /// heads up notifications.
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
+  }
+  void listenFCM() async {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null && !kIsWeb) {
+        flutterLocalNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channel.id,
+              channel.name,
+              icon: 'launch_background',
+            ),
+          ),
+        );
+      }
+    });
+  }
+  void requestPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+    }
   }
 
   @override
@@ -150,39 +238,41 @@ class _HPState extends State<HP> {
           }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
-      body: isLoading!=true && isTrue==true?SingleChildScrollView(
-        child: widgetOptions[indexx],
-      ):isLoading==true?Center(
-        child: CircularProgressIndicator(),
-      ):
-      Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: w * 0.12,
-              height: h * 0.12,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/warning.png"),
-                  // fit:BoxFit.fill
-                ),
-              ),
-            ),
-            Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
-            Text(
-              "in getting user data.",
-              style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              "please try logging out!",
-              style: TextStyle(fontSize: 20),
-            )
-          ],
-        ),
-      ),
-
+      // body: isLoading!=true && isTrue==true?SingleChildScrollView(
+      //   child: widgetOptions[indexx],
+      // ):isLoading==true?Center(
+      //   child: CircularProgressIndicator(),
+      // ):
+      // Center(
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     crossAxisAlignment: CrossAxisAlignment.center,
+      //     children: [
+      //       Container(
+      //         width: w * 0.12,
+      //         height: h * 0.12,
+      //         decoration: BoxDecoration(
+      //           image: DecorationImage(
+      //             image: AssetImage("assets/warning.png"),
+      //             // fit:BoxFit.fill
+      //           ),
+      //         ),
+      //       ),
+      //       Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+      //       Text(
+      //         "in getting user data.",
+      //         style: TextStyle(fontSize: 20),
+      //       ),
+      //       Text(
+      //         "please try logging out!",
+      //         style: TextStyle(fontSize: 20),
+      //       )
+      //     ],
+      //   ),
+      // ),
+      body:ElevatedButton( onPressed: (){
+        sendPushMessage();
+      }, child: Text("Send notification"),),
       floatingActionButton:isLoading!=true&& isTrue==true?inventoryM==true&& indexx==1? FloatingActionButton.extended(onPressed: () {
         Navigator.pushNamed(context, '/addItem');
       },
@@ -502,6 +592,13 @@ class _HPState extends State<HP> {
   @override
   void initState() {
     super.initState();
+    debugPrint("init of home paaaaaaaaaage");
+     requestPermission();
+
+    loadFCM();
+
+    listenFCM();
+    getToken();
     _isMounted = true;
     _loadData2();
 
@@ -600,7 +697,37 @@ class _HPState extends State<HP> {
    }
  }
 
-
+  void sendPushMessage() async {
+    try {
+      debugPrint("enter send push message");
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': 'Test Body',
+              'title': 'Test Title 2'
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done'
+            },
+            "to": "/topics/Animal",
+          },
+        ),
+      );
+      debugPrint("exit send push notif");
+    }
+    catch (e) {
+      debugPrint("error push notification");
+    }
+  }
   Future<void> _getLoggedInId() async{
     try {
       String x=await getIdofUser();
