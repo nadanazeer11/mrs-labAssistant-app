@@ -31,7 +31,7 @@ class CreatePController{
 
     return userNames;
   }
-  Future<void>createProject(Project project)async{
+  Future<String>createProject(Project project)async{
     DocumentReference id;
     try{
       debugPrint("in create P cont");
@@ -46,10 +46,34 @@ class CreatePController{
          'projects': FieldValue.arrayUnion([id.id])
        });
      }
+     return id.id;
     }
     catch(e){
       throw Exception("f");
     }
+  }
+  Future<List<String>> getTokens(List<String>names) async{
+    try{
+
+      List<String> result=[];
+      QuerySnapshot querySnapshot = await _db.collection('users')
+          .where('name', whereIn: names)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        int count=1;
+        debugPrint("tokennnnnnnn ${doc["token"]}");
+        count+=1;
+        result.add(doc['token']);
+      }
+      // debugPrint("uaraaaaaaaaaaaaah${result[0]}");
+      // debugPrint("uaraaaaaaaaaaaaah${result[1]}");
+      return result;
+    }
+    catch(e){
+      throw Exception("F");
+    }
+
   }
 
 }

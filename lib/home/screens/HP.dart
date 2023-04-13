@@ -596,9 +596,17 @@ class _HPState extends State<HP> {
     super.initState();
     debugPrint("init of home paaaaaaaaaage");
      requestPermission();
-    FirebaseMessaging.instance.subscribeToTopic("Animal");
+     // FirebaseMessaging.instance.subscribeToTopic("Animal");
     loadFCM();
+    List<String> userTokens = ['user1_token', 'user2_token'];
 
+// Subscribe the users to the "posts" topic.
+
+    // FirebaseMessaging.instance.subscribeToTopic(userTokens, 'posts').then((response) {
+    //   print('Subscribed ${response.successCount} users to the "posts" topic.');
+    // }).catchError((error) {
+    //   print('Error subscribing users to the "posts" topic: $error');
+    // });
     listenFCM();
     getToken();
     _isMounted = true;

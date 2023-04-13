@@ -41,7 +41,7 @@ class _CreateUState extends State<CreateU> {
           email: _emailController.text.trim().toLowerCase(),
           password:_passwordController.text,
           projects: [],tasks: [],createP:CreateP,
-          addU:CreateU,inventoryM: inventoryM);
+          addU:CreateU,inventoryM: inventoryM,token: "zero");
       try{
         debugPrint("in try");
         setState(() {

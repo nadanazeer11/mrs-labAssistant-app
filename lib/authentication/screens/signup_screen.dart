@@ -42,7 +42,7 @@ class _SignupScreenState extends State<SignupScreen> {
             name:usernameController.text,
             email: emailController.text,
             password:passwordController.text,
-            projects: [],tasks: [],createP:false,addU:true,inventoryM: false);
+            projects: [],tasks: [],createP:false,addU:true,inventoryM: false,token:"");
         try{
           email=await authenticate.emailCheck(user.email);
           if(!email){

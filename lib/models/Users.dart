@@ -7,6 +7,7 @@ class Userr {
   final bool createP;
   final bool addU;
   final bool inventoryM;
+  final String token;
 
   Userr(
       { required this.name,
@@ -16,7 +17,8 @@ class Userr {
         required this.tasks,
         required this.createP,
         required this.addU,
-        required this.inventoryM
+        required this.inventoryM,
+        required this.token
       });
 
 }

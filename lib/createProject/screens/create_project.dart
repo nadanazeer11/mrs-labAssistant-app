@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mrs/models/Project.dart';
 
 import '../../common.dart';
@@ -8,6 +13,9 @@ import '../../config/colors.dart';
 import '../../config/n.dart';
 import '../../config/text_styles.dart';
 import '../backend/CreateP.dart';
+
+import 'package:http/http.dart' as http;
+// import 'package:firebase_admin/firebase_admin.dart';
 
 class Create_Project extends StatefulWidget {
   const Create_Project({Key? key}) : super(key: key);
@@ -122,7 +130,7 @@ class _Create_ProjectState extends State<Create_Project> {
       setState(() {
         loading=true;
       });
-      await contr.createProject(project);
+      String idd=await contr.createProject(project);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Project successfully created!'),
@@ -131,11 +139,34 @@ class _Create_ProjectState extends State<Create_Project> {
       );
       setState(() {
         _error="";
-        _selectedItems=[];
+
         loading=false;
       });
-      _projectNameController.clear();
-      _projectDescripController.clear();
+      String title= _projectNameController.text;
+      String text="You are assigned project $title by $loggedInName";
+      // _projectNameController.clear();
+      // _projectDescripController.clear();
+    try{
+      List<String> tokens=await contr.getTokens(_selectedItems);
+      // setState(() {
+      //   _selectedItems=[];
+      // });
+      sendPushMessage(title, text, tokens,idd);
+
+
+    }
+    catch(e){
+      // setState(() {
+      //   _selectedItems=[];
+      // });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error sending notification to users'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
 
     }
     catch(e){
@@ -143,6 +174,40 @@ class _Create_ProjectState extends State<Create_Project> {
         _error="Cant create project,please try again";
         loading=false;
       });
+    }
+  }
+  void sendPushMessage(String title,String text,List<String> tokens,String id) async {
+    try {
+      debugPrint("enter send push message of id $id");
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': text,
+              'title':title
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+              'notifType':"project created",
+              'projectId':id
+            },
+            // "to": tokens[0],
+            'registration_ids': tokens,
+          },
+        ),
+      );
+      debugPrint("exit send push notif");
+    }
+    catch (e) {
+      debugPrint("error push notification");
     }
   }
 
@@ -331,10 +396,12 @@ class MultiSelect extends StatefulWidget {
 }
 class _MultiSelectState extends State<MultiSelect> {
   List<String> _selectedItems=[];
+
   void initState() {
     super.initState();
     _selectedItems = widget.preSelectedItems;
   }
+
   void _itemChange(String itemValue,bool isSelected){
     setState(() {
       if(isSelected){

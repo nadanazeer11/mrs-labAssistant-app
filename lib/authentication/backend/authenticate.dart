@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mrs/models/Users.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -25,7 +26,8 @@ class Authenticate{
         "tasks":user.tasks,
         "createP":user.createP,
         "addU":user.addU,
-        "inventoryM":user.inventoryM
+        "inventoryM":user.inventoryM,
+        "token":user.token
       });
       final User? user2=auth.currentUser;
       await auth.signOut();
@@ -52,11 +54,11 @@ class Authenticate{
   }
   Future<bool> emailCheck(String email) async{
     try{
-      debugPrint("email $email");
       final querySnapshot=await _db.collection('users').where('email',isEqualTo: email).get();
       return querySnapshot.docs.isNotEmpty;
     }
     catch(e){
+      debugPrint("error checking if user exists");
       throw Exception('Error Checking if user exists');
     }
   }
@@ -68,6 +70,28 @@ class Authenticate{
       return e;
     }
     return null;
+  }
+  Future<void> checkToken(String name)async{
+    final querySnapshot=await _db.collection('users').where('email',isEqualTo: name).get();
+    String token=querySnapshot.docs.first.get('token');
+    String namse=querySnapshot.docs.first.get('name');
+    String id=querySnapshot.docs.first.id;
+    debugPrint("nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: $token");
+    try{
+      if(token=="zero"){
+        await FirebaseMessaging.instance.getToken().then(
+                (token) async {
+              debugPrint("my token in authenticate is $token");
+              await FirebaseFirestore.instance.collection("users").doc(id).set({
+                'token' : token,
+              },SetOptions(merge: true));
+            }
+        );
+      }
+    }
+    catch(e){
+
+    }
   }
   Future<void>logoutMethod()async{
     try{

@@ -78,6 +78,7 @@ class _LoginState extends State<Login> {
               _loading = false;
               errorMessage = "";
             });
+            await authenticate.checkToken(emailController.text.trim().toLowerCase());
             Navigator.popAndPushNamed(context, '/home');
           }
         }
