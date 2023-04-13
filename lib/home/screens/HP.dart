@@ -176,7 +176,9 @@ class _HPState extends State<HP> {
         badge: true,
         sound: true,
       );
+
     }
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
   void listenFCM() async {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -594,7 +596,7 @@ class _HPState extends State<HP> {
     super.initState();
     debugPrint("init of home paaaaaaaaaage");
      requestPermission();
-
+    FirebaseMessaging.instance.subscribeToTopic("Animal");
     loadFCM();
 
     listenFCM();
@@ -696,7 +698,26 @@ class _HPState extends State<HP> {
      }
    }
  }
-
+  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    debugPrint("background message");
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            icon: 'launch_background',
+            importance: Importance.high
+          ),
+        ),
+      );
+    }
+  }
   void sendPushMessage() async {
     try {
       debugPrint("enter send push message");
