@@ -18,6 +18,7 @@ import '../../config/text_styles.dart';
 import '../../inventory/backend/inventContr.dart';
 import '../../inventory/screens/inventory5.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 
 class HP extends StatefulWidget {
@@ -28,6 +29,7 @@ class HP extends StatefulWidget {
 }
 
 class _HPState extends State<HP> {
+
   String ?errorPass;
   bool wrongpass=false;
   HomeContr hmc=new HomeContr();
@@ -138,16 +140,6 @@ class _HPState extends State<HP> {
       debugPrint("the index$index");
     });
   }
-  void getToken() async {
-    await FirebaseMessaging.instance.getToken().then(
-            (token) {
-              debugPrint("my token is $token");
-          setState(() {
-            token = token;
-          });
-        }
-    );
-  }
   void loadFCM() async {
     if (!kIsWeb) {
       channel =  AndroidNotificationChannel(
@@ -178,13 +170,17 @@ class _HPState extends State<HP> {
       );
 
     }
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
   void listenFCM() async {
+
+
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null && !kIsWeb) {
+
         flutterLocalNotificationsPlugin.show(
           notification.hashCode,
           notification.title,
@@ -193,12 +189,58 @@ class _HPState extends State<HP> {
             android: AndroidNotificationDetails(
               channel.id,
               channel.name,
-              icon: 'launch_background',
+              icon: '@mipmap/mrsrb',
+
             ),
           ),
         );
+        final data=message.data;
+        debugPrint("nada nazeer yassar ${data['notifType']}");
+        debugPrint("nada nazeer yassar ${data['projectId']}");
+        String ? notifType=data['notifType'];
+        String ? projectId=data['projectId'];
+        if(notifType!=null){
+          if(notifType=="1"){
+            if(projectId!=null){
+              debugPrint("project id kaza $projectId");
+             // Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
+
+            }
+          }
+        }
       }
     });
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      debugPrint("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+      handleMessage(context, event);
+    });
+    // RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    //
+    // if(initialMessage != null){
+    //   handleMessage(context, initialMessage);
+    // }
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if(message != null){
+       debugPrint("naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaada");
+      }
+    });
+
+  }
+  void handleMessage(BuildContext context, RemoteMessage message) {
+    final data=message.data;
+    debugPrint("dost w el7");
+    String ? notifType=data['notifType'];
+    String ? projectId=data['projectId'];
+    if(notifType!=null){
+      if(notifType=="1"){
+        if(projectId!=null){
+          debugPrint("dost 3ala $projectId");
+        Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
+
+        }
+      }
+    }
   }
   void requestPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -221,6 +263,56 @@ class _HPState extends State<HP> {
       print('User declined or has not accepted permission');
     }
   }
+  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    // If you're going to use other Firebase services in the background, such as Firestore,
+    // make sure you call `initializeApp` before using other Firebase services.
+    final data=message.data;
+    debugPrint("back ya nasa nazzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+    String ? notifType=data['notifType'];
+    String ? projectId=data['projectId'];
+    if(notifType!=null){
+      if(notifType=="1"){
+        if(projectId!=null){
+          debugPrint("project idss kaza $projectId");
+          // Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
+
+        }
+      }
+    }
+    debugPrint('Handling a background message ${message.messageId}');
+  }
+
+  void sendPushMessage() async {
+    try {
+      debugPrint("enter send push message");
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': 'Test Body',
+              'title': 'Test Title 2'
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done'
+            },
+            "to": "/topics/Animal",
+          },
+        ),
+      );
+      debugPrint("exit send push notif");
+    }
+    catch (e) {
+      debugPrint("error push notification");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,46 +327,52 @@ class _HPState extends State<HP> {
         elevation: 0,
         title:Text("MRS",style:subHeadingStyle) ,
         actions: [
-          IconButton(onPressed: (){
+          IconButton(onPressed: () async {
+            debugPrint("getting token");
+            await FirebaseMessaging.instance.getToken().then(
+                    (token) async {
+                  debugPrint("my token in authenticate is $token");
 
+                }
+            );
           }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
-      // body: isLoading!=true && isTrue==true?SingleChildScrollView(
-      //   child: widgetOptions[indexx],
-      // ):isLoading==true?Center(
-      //   child: CircularProgressIndicator(),
-      // ):
-      // Center(
-      //   child: Column(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     crossAxisAlignment: CrossAxisAlignment.center,
-      //     children: [
-      //       Container(
-      //         width: w * 0.12,
-      //         height: h * 0.12,
-      //         decoration: BoxDecoration(
-      //           image: DecorationImage(
-      //             image: AssetImage("assets/warning.png"),
-      //             // fit:BoxFit.fill
-      //           ),
-      //         ),
-      //       ),
-      //       Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
-      //       Text(
-      //         "in getting user data.",
-      //         style: TextStyle(fontSize: 20),
-      //       ),
-      //       Text(
-      //         "please try logging out!",
-      //         style: TextStyle(fontSize: 20),
-      //       )
-      //     ],
-      //   ),
-      // ),
-      body:ElevatedButton( onPressed: (){
-        sendPushMessage();
-      }, child: Text("Send notification"),),
+      body: isLoading!=true && isTrue==true?SingleChildScrollView(
+        child: widgetOptions[indexx],
+      ):isLoading==true?Center(
+        child: CircularProgressIndicator(),
+      ):
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: w * 0.12,
+              height: h * 0.12,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/warning.png"),
+                  // fit:BoxFit.fill
+                ),
+              ),
+            ),
+            Text("An unexpected error occured", style: TextStyle(fontSize: 20)),
+            Text(
+              "in getting user data.",
+              style: TextStyle(fontSize: 20),
+            ),
+            Text(
+              "please try logging out!",
+              style: TextStyle(fontSize: 20),
+            )
+          ],
+        ),
+      ),
+      // body:ElevatedButton( onPressed: (){
+      //   sendPushMessage();
+      // }, child: Text("Send notification"),),
       floatingActionButton:isLoading!=true&& isTrue==true?inventoryM==true&& indexx==1? FloatingActionButton.extended(onPressed: () {
         Navigator.pushNamed(context, '/addItem');
       },
@@ -596,19 +694,11 @@ class _HPState extends State<HP> {
     super.initState();
     debugPrint("init of home paaaaaaaaaage");
      requestPermission();
-     // FirebaseMessaging.instance.subscribeToTopic("Animal");
+     FirebaseMessaging.instance.subscribeToTopic("Animal");
     loadFCM();
-    List<String> userTokens = ['user1_token', 'user2_token'];
 
-// Subscribe the users to the "posts" topic.
-
-    // FirebaseMessaging.instance.subscribeToTopic(userTokens, 'posts').then((response) {
-    //   print('Subscribed ${response.successCount} users to the "posts" topic.');
-    // }).catchError((error) {
-    //   print('Error subscribing users to the "posts" topic: $error');
-    // });
     listenFCM();
-    getToken();
+
     _isMounted = true;
     _loadData2();
 
@@ -706,57 +796,6 @@ class _HPState extends State<HP> {
      }
    }
  }
-  Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    debugPrint("background message");
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
-    if (notification != null && android != null && !kIsWeb) {
-      flutterLocalNotificationsPlugin.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            channel.id,
-            channel.name,
-            icon: 'launch_background',
-            importance: Importance.high
-          ),
-        ),
-      );
-    }
-  }
-  void sendPushMessage() async {
-    try {
-      debugPrint("enter send push message");
-      await http.post(
-        Uri.parse('https://fcm.googleapis.com/fcm/send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
-        },
-        body: jsonEncode(
-          <String, dynamic>{
-            'notification': <String, dynamic>{
-              'body': 'Test Body',
-              'title': 'Test Title 2'
-            },
-            'priority': 'high',
-            'data': <String, dynamic>{
-              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-              'id': '1',
-              'status': 'done'
-            },
-            "to": "/topics/Animal",
-          },
-        ),
-      );
-      debugPrint("exit send push notif");
-    }
-    catch (e) {
-      debugPrint("error push notification");
-    }
-  }
   Future<void> _getLoggedInId() async{
     try {
       String x=await getIdofUser();

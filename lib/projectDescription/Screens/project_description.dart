@@ -322,9 +322,9 @@ class _ProjDescripState extends State<ProjDescrip> {
               if (snapshot.connectionState == ConnectionState.waiting){
                 return const Center(child: CircularProgressIndicator(),);
               }
-                return const Center(
+                return  Center(
                     child: Text(
-                      'Something went wrong',
+                      'Something went wrong $id',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
                     ));
             }

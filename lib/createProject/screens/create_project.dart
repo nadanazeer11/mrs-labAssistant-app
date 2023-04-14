@@ -55,10 +55,20 @@ class _Create_ProjectState extends State<Create_Project> {
   }
   void initState()  {
     super.initState();
+   getToke();
     _projectNameController.addListener(_checkFieldsEntered);
     _projectDescripController.addListener(_checkFieldsEntered);
      _getUserNames();
     _getLoggedInName();
+  }
+  void getToke() async{
+    debugPrint("getToke");
+    await FirebaseMessaging.instance.getToken().then(
+            (token) async {
+          debugPrint("my token in authenticate is $token");
+
+        }
+    );
   }
   void _getLoggedInName()async{
     try {
@@ -193,10 +203,10 @@ class _Create_ProjectState extends State<Create_Project> {
             },
             'priority': 'high',
             'data': <String, dynamic>{
-              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              // 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
               'id': '1',
               'status': 'done',
-              'notifType':"project created",
+              'notifType':"1",
               'projectId':id
             },
             // "to": tokens[0],
@@ -219,9 +229,17 @@ class _Create_ProjectState extends State<Create_Project> {
       appBar: AppBar(
         backgroundColor:AppColorss.lightmainColor ,
         elevation: 0,
-        title:Text("MRS",style:subHeadingStyle) ,
+        title:Text("MRSss",style:subHeadingStyle) ,
         actions: [
-          IconButton(onPressed: (){}, icon:Icon(Icons.filter_list_outlined))
+          IconButton(onPressed: ()async{
+            debugPrint("getting token");
+            await FirebaseMessaging.instance.getToken().then(
+                    (token) async {
+                  debugPrint("my token in authenticate is $token");
+
+                }
+            );
+          }, icon:Icon(Icons.filter_list_outlined))
         ],
       ),
       body: Container(
