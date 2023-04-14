@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,7 @@ import '../../common.dart';
 import '../../config/colors.dart';
 import '../../config/text_styles.dart';
 import '../backend/inventContr.dart';
+import 'package:http/http.dart' as http;
 import '../widgets/scrollable_widget.dart';
 
 class AddItem extends StatefulWidget {
@@ -465,6 +468,8 @@ class _AddItemState extends State<AddItem> {
                                                 setState(() {
                                                   popUpLoading=false;
                                                 });
+
+                                                sendPushMessage("Loose",data.toLowerCase().trim());
                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                   SnackBar(
                                                     content: Text('Item successfully created!'),
@@ -550,7 +555,7 @@ class _AddItemState extends State<AddItem> {
           showPlatformDialog(
             context: context,
             builder: (context) => BasicDialogAlert(
-              title: Text("Authentication Error"),
+              title: const Text("Authentication Error"),
               content:
               Text("Id already exists"),
               actions: <Widget>[
@@ -593,6 +598,7 @@ class _AddItemState extends State<AddItem> {
             _idController.clear();
             _nameController.clear();
             await _getData();
+            sendPushMessage("Loose",name);
           }
           catch(e){
             setState(() {
@@ -687,6 +693,7 @@ class _AddItemState extends State<AddItem> {
             _idController3.clear();
             _nameController3.clear();
             _descriptionController.clear();
+            sendPushMessage("Compact",name);
           }
           catch(e){
             setState(() {
@@ -725,6 +732,40 @@ class _AddItemState extends State<AddItem> {
 
     }
   }
+  void sendPushMessage(String type,String name) async {
+   try {
+     debugPrint("enter send push message of inventory change status");
+     await http.post(
+       Uri.parse('https://fcm.googleapis.com/fcm/send'),
+       headers: <String, String>{
+         'Content-Type': 'application/json',
+         'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+       },
+       body: jsonEncode(
+         <String, dynamic>{
+           'notification': <String, dynamic>{
+             'body': "$name newly created by $loggedInName",
+             'title':"$type inventory update"
+           },
+           'priority': 'high',
+           'data': <String, dynamic>{
+             // 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+             'id': '1',
+             'status': 'done',
+             'notifType':"2",
+
+           },
+           "to":"/topics/InventoryBroadCast"
+         },
+       ),
+     );
+     debugPrint("exit send push notif");
+   }
+   catch (e) {
+     debugPrint("error push notification");
+   }
+ }
+
  @override
   void initState() {
     super.initState();

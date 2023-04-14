@@ -18,7 +18,6 @@ import '../../config/text_styles.dart';
 import '../../inventory/backend/inventContr.dart';
 import '../../inventory/screens/inventory5.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
 
 
 class HP extends StatefulWidget {
@@ -29,7 +28,6 @@ class HP extends StatefulWidget {
 }
 
 class _HPState extends State<HP> {
-
   String ?errorPass;
   bool wrongpass=false;
   HomeContr hmc=new HomeContr();
@@ -174,8 +172,6 @@ class _HPState extends State<HP> {
   }
   void listenFCM() async {
 
-
-
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
@@ -189,8 +185,7 @@ class _HPState extends State<HP> {
             android: AndroidNotificationDetails(
               channel.id,
               channel.name,
-              icon: '@mipmap/mrsrb',
-
+              icon: 'launch_background',
             ),
           ),
         );
@@ -241,6 +236,17 @@ class _HPState extends State<HP> {
         }
       }
     }
+    if(notifType!=null){
+      if(notifType=="2"){
+          debugPrint("dost 3ala notifcation el ineventoooooooooooooooooooooooooooooooooooory");
+          final navigator = Navigator.of(context);
+          final stack = navigator.widget.pages;
+          Navigator.popAndPushNamed(context, '/home');
+          onItemTapped(1);
+
+
+      }
+    }
   }
   void requestPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -273,6 +279,8 @@ class _HPState extends State<HP> {
     if(notifType!=null){
       if(notifType=="1"){
         if(projectId!=null){
+
+
           debugPrint("project idss kaza $projectId");
           // Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
 
@@ -694,7 +702,9 @@ class _HPState extends State<HP> {
     super.initState();
     debugPrint("init of home paaaaaaaaaage");
      requestPermission();
-     FirebaseMessaging.instance.subscribeToTopic("Animal");
+     // FirebaseMessaging.instance.subscribeToTopic("Animal");
+    FirebaseMessaging.instance.subscribeToTopic("InventoryBroadCast");
+
     loadFCM();
 
     listenFCM();
@@ -755,6 +765,9 @@ class _HPState extends State<HP> {
              setState(() {
                inventoryM = x;
              });
+             if(x){
+               FirebaseMessaging.instance.subscribeToTopic("Inventory");
+             }
              debugPrint("finished loading the home screen");
              try {
                String name = await getLoggedInName();
@@ -856,6 +869,9 @@ class _HPState extends State<HP> {
         inventoryM=x;
       });
       debugPrint("inventoryM $inventoryM");
+      if(x){
+        FirebaseMessaging.instance.subscribeToTopic("Inventory");
+      }
     }
     catch(e){
       ScaffoldMessenger.of(context).showSnackBar(

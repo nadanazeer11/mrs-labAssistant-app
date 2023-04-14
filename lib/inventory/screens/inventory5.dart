@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ import '../../models/CompactInventory.dart';
 import '../../models/InventoryItems.dart';
 import '../backend/inventContr.dart';
 import '../widgets/scrollable_widget.dart';
+import 'package:http/http.dart' as http;
 
 class Inventory5 extends StatefulWidget {
   const Inventory5({Key? key}) : super(key: key);
@@ -57,7 +60,94 @@ class _Inventory5State extends State<Inventory5> {
   final _formdead2 = GlobalKey<FormState>();
   var deadReasonController2 = TextEditingController();
   bool deadLoading2 = false;
+  void sendPushMessage(String status,String itemName) async {
+    try {
+      debugPrint("enter send push message of inventory change status");
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': "$itemName marked as $status by $loggedInName",
+              'title':"Inventory update"
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              // 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+              'notifType':"2",
 
+            },
+            "to":"/topics/Inventory"
+          },
+        ),
+      );
+      debugPrint("exit send push notif");
+    }
+    catch (e) {
+      debugPrint("error push notification");
+    }
+  }
+  Future<void> changeStatus(BuildContext context, String itemId, String date,
+      String username, String status, String deathReason,String itemName) async {
+    try {
+      await inventoryC.changeStatus(
+          itemId, status, loggedInName, date, username, deathReason);
+      sendPushMessage(status, itemName);
+      if (status == "Borrowed") {
+        borrowUserController.clear();
+        setState(() {
+          giveAccessloading = false;
+        });
+      } else if (status == "Available") {
+        setState(() {
+          returnBackLoading = false;
+        });
+        returnUserController.clear();
+      } else if (status == "Dead") {
+        setState(() {
+          deadLoading = false;
+        });
+        deadReasonController.clear();
+      }
+      Navigator.pop(context);
+      status == "Borrowed"
+          ? ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Access given to ${username}"),
+          backgroundColor: Colors.green,
+        ),
+      )
+          : status == "Available"
+          ? ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("item successfully returned"),
+          backgroundColor: Colors.green,
+        ),
+      )
+          : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("item successfully marked as Dead"),
+        backgroundColor: Colors.green,
+      ));
+    } catch (e) {
+      setState(() {
+        giveAccessloading = false;
+        deadLoading = false;
+        returnBackLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Error updating status,try again!"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -1563,7 +1653,8 @@ class _Inventory5State extends State<Inventory5> {
                                                           "",
                                                           "",
                                                           "Available",
-                                                          "");
+                                                          "",
+                                                      itemName);
                                                     } else {
                                                       setState(() {
                                                         returnBackLoading =
@@ -1676,7 +1767,8 @@ class _Inventory5State extends State<Inventory5> {
                                                   formattedDate,
                                                   "",
                                                   "Dead",
-                                                  deadReasonController.text);
+                                                  deadReasonController.text,
+                                              itemName);
                                             }
                                           },
                                           child: Text(
@@ -1795,7 +1887,8 @@ class _Inventory5State extends State<Inventory5> {
                                                 formattedDate,
                                                 username,
                                                 "Borrowed",
-                                                "");
+                                                "",
+                                            itemName);
                                           } else {
                                             setState(() {
                                               giveAccessloading = false;
@@ -1853,60 +1946,7 @@ class _Inventory5State extends State<Inventory5> {
     );
   }
 
-  Future<void> changeStatus(BuildContext context, String itemId, String date,
-      String username, String status, String deathReason) async {
-    try {
-      await inventoryC.changeStatus(
-          itemId, status, loggedInName, date, username, deathReason);
-      if (status == "Borrowed") {
-        borrowUserController.clear();
-        setState(() {
-          giveAccessloading = false;
-        });
-      } else if (status == "Available") {
-        setState(() {
-          returnBackLoading = false;
-        });
-        returnUserController.clear();
-      } else if (status == "Dead") {
-        setState(() {
-          deadLoading = false;
-        });
-        deadReasonController.clear();
-      }
-      Navigator.pop(context);
-      status == "Borrowed"
-          ? ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Access given to ${username}"),
-                backgroundColor: Colors.green,
-              ),
-            )
-          : status == "Available"
-              ? ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("item successfully returned"),
-                    backgroundColor: Colors.green,
-                  ),
-                )
-              : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("item successfully marked as Dead"),
-                  backgroundColor: Colors.green,
-                ));
-    } catch (e) {
-      setState(() {
-        giveAccessloading = false;
-        deadLoading = false;
-        returnBackLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Error updating status,try again!"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+
 
   AlertDialog buildSummaryAlert(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -2451,7 +2491,8 @@ class _Inventory5State extends State<Inventory5> {
                                             formattedDate,
                                             "",
                                             "Dead",
-                                            deadReasonController2.text);
+                                            deadReasonController2.text,
+                                        itemName);
                                       }
                                     },
                                     child: Text(
@@ -2477,10 +2518,11 @@ class _Inventory5State extends State<Inventory5> {
     );
   }
   Future<void> changeStatus2(BuildContext context, String itemId, String date,
-      String username, String status, String deathReason) async {
+      String username, String status, String deathReason,String itemName) async {
     try {
       await inventoryC.changeStatus2(
           itemId, status, loggedInName, date, username, deathReason);
+      sendPushMessage(status, itemName);
       if (status == "Borrowed") {
         borrowUserController.clear();
         setState(() {
