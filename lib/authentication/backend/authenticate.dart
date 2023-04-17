@@ -74,20 +74,21 @@ class Authenticate{
   Future<void> checkToken(String name)async{
     final querySnapshot=await _db.collection('users').where('email',isEqualTo: name).get();
     String token=querySnapshot.docs.first.get('token');
-    String namse=querySnapshot.docs.first.get('name');
     String id=querySnapshot.docs.first.id;
-    debugPrint("nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee: $token");
     try{
-      if(token=="zero"){
+
         await FirebaseMessaging.instance.getToken().then(
                 (token) async {
               debugPrint("my token in authenticate is $token");
               await FirebaseFirestore.instance.collection("users").doc(id).set({
                 'token' : token,
               },SetOptions(merge: true));
+              debugPrint("tokeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen is"
+                  " zeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeero $token");
             }
         );
-      }
+
+
     }
     catch(e){
 

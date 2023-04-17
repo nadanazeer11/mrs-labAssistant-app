@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -5,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:ui';
+import 'package:http/http.dart' as http;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:file_picker/file_picker.dart';
@@ -53,6 +56,7 @@ class _ProjDescripState extends State<ProjDescrip> {
   String url="";
   bool sendButton=true;
   bool stop=false;
+  List<String> userss=[];
 
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
@@ -112,7 +116,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
   debugPrint("upload file with name $fileName");
   }
-  Future<void> sendNote(String text,BuildContext context)async{
+  Future<void> sendNote(String text,BuildContext context,String ? title)async{
     try{
       await uploadFile(context);
       try{
@@ -132,6 +136,8 @@ class _ProjDescripState extends State<ProjDescrip> {
                 url="";
               });
             });
+            sendPushMessage(title, text, id);
+
           }
           else if(url != "" && fileName!="No file Selected"){
             Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
@@ -146,6 +152,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                 url="";
               });
             });
+            sendPushMessage(title, text, id);
 
           }
           ScaffoldMessenger.of(context).showSnackBar(
@@ -178,6 +185,57 @@ class _ProjDescripState extends State<ProjDescrip> {
     }
 
   }
+  void sendPushMessage(String ?title,String? text,String? id) async {
+      if(userss.isEmpty){
+        debugPrint("users is empty");
+        List<String> m=await pdc.getUsers(id);
+        setState(() {
+
+          userss=m;
+        });
+        for(String z in m){
+          debugPrint("eliane $z");
+        }
+      }
+
+      try {
+        debugPrint("enter send push message of id $id");
+        await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Authorization': 'key=AAAAj11i4V8:APA91bHghfWBgt7-fyPnshItM_nM7CESH3tZnO5mAQ9TMA6GJSbyFg9_PTNp4-YQ56v6BIePSufVw4R_wiIW_C5AilRIIteuEV-5ZesQSwGCI1sPu2k6btlvW7a3crBDRXs1tbd4cfix',
+          },
+          body: jsonEncode(
+            <String, dynamic>{
+              'notification': <String, dynamic>{
+                'body': "$loggedInName: $text",
+                'title':title
+              },
+              'priority': 'high',
+              'data': <String, dynamic>{
+                // 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+                'id': '1',
+                'status': 'done',
+                'notifType':"1",
+                'projectId':id
+              },
+              // "to": tokens[0],
+              'registration_ids': userss,
+            },
+          ),
+        );
+        debugPrint("exit send push notif");
+      }
+      catch (e) {
+        debugPrint("error push notification");
+      }
+
+
+
+
+  }
+
 
   @override
 
@@ -203,6 +261,7 @@ class _ProjDescripState extends State<ProjDescrip> {
           body:StreamBuilder<Project>(
               stream: homeC.getProjectDetails(id),
               builder: (context, snapshot) {
+                debugPrint("yarab x3 $id");
               if(snapshot.hasData){
                 Project? project=snapshot.data;
                 Timestamp? date=project?.endDate;
@@ -312,7 +371,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                     ),
 
                     // buttonArrow(context),
-                    scroll(context,project?.notes),
+                    scroll(context,project?.notes,project?.title),
 
 
                   ],
@@ -321,6 +380,14 @@ class _ProjDescripState extends State<ProjDescrip> {
               }
               if (snapshot.connectionState == ConnectionState.waiting){
                 return const Center(child: CircularProgressIndicator(),);
+              }
+              if(snapshot.hasError){
+                debugPrint("yarab ${snapshot.error}");
+                Project? project=snapshot.data;
+                Timestamp? date=project?.endDate;
+                debugPrint("yarab2 $date");
+                return const Center(child:Text("Error occurred while loading data,please try again"),);
+
               }
                 return  Center(
                     child: Text(
@@ -335,7 +402,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
 
 
-  scroll(BuildContext context,List<String>? ids){
+  scroll(BuildContext context,List<String>? ids,String ? title){
     double w=MediaQuery.of(context).size.width;
     final h = MediaQuery.of(context).size.height;
     final initialChildSize = 0.5;
@@ -497,7 +564,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
 
                                       });
-                                      await sendNote(_notesText.text, context);
+                                      await sendNote(_notesText.text, context,title);
                                       setState(() {
                                         addMyComment=false;
                                         _notesText.clear();

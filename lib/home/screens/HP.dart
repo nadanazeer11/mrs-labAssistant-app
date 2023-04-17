@@ -133,10 +133,12 @@ class _HPState extends State<HP> {
   ];
   int indexx=0;
   void onItemTapped(int index){
+
     setState((){
       indexx=index;
       debugPrint("the index$index");
     });
+    debugPrint("on item tapped $indexx");
   }
   void loadFCM() async {
     if (!kIsWeb) {
@@ -232,21 +234,37 @@ class _HPState extends State<HP> {
         if(projectId!=null){
           debugPrint("dost 3ala $projectId");
         Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
-
+        //   if (ModalRoute.of(context)?.settings.name != '/projectDetails') {
+        //     Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
+        //   }
         }
       }
-    }
-    if(notifType!=null){
-      if(notifType=="2"){
-          debugPrint("dost 3ala notifcation el ineventoooooooooooooooooooooooooooooooooooory");
-          final navigator = Navigator.of(context);
-          final stack = navigator.widget.pages;
-          Navigator.popAndPushNamed(context, '/home');
+      else if(notifType=="2"){
+        // debugPrint("dost 3ala notifcation el ineventoooooooooooooooooooooooooooooooooooory");
+        // final navigator = Navigator.of(context);
+        // final stack = navigator.widget.pages;
+        // Navigator.popAndPushNamed(context, '/home');
+        // onItemTapped(1);
+        // if (ModalRoute.of(context)?.isFirst ?? true) {
+        //   // If the current route is the first route on the stack
+        //   // Navigator.popAndPushNamed(context, '/home');
+        //   debugPrint("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh00000");
+        //   onItemTapped(1);
+        // } else {
+        //   // If the current route is not the first route on the stack
+        //   Navigator.pushNamed(context, '/home');
+        // }
+        if (Navigator.of(context).canPop()) {
+          Navigator.pushNamed(context, '/home');
           onItemTapped(1);
-
+        } else {
+          onItemTapped(1);
+        }
 
       }
+
     }
+
   }
   void requestPermission() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;

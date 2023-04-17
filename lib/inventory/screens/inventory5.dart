@@ -60,7 +60,7 @@ class _Inventory5State extends State<Inventory5> {
   final _formdead2 = GlobalKey<FormState>();
   var deadReasonController2 = TextEditingController();
   bool deadLoading2 = false;
-  void sendPushMessage(String status,String itemName) async {
+  void sendPushMessage(String status,String itemName,String type) async {
     try {
       debugPrint("enter send push message of inventory change status");
       await http.post(
@@ -73,7 +73,7 @@ class _Inventory5State extends State<Inventory5> {
           <String, dynamic>{
             'notification': <String, dynamic>{
               'body': "$itemName marked as $status by $loggedInName",
-              'title':"Inventory update"
+              'title':"$type inventory update"
             },
             'priority': 'high',
             'data': <String, dynamic>{
@@ -98,7 +98,7 @@ class _Inventory5State extends State<Inventory5> {
     try {
       await inventoryC.changeStatus(
           itemId, status, loggedInName, date, username, deathReason);
-      sendPushMessage(status, itemName);
+      sendPushMessage(status, itemName,"Loose");
       if (status == "Borrowed") {
         borrowUserController.clear();
         setState(() {
@@ -2522,7 +2522,7 @@ class _Inventory5State extends State<Inventory5> {
     try {
       await inventoryC.changeStatus2(
           itemId, status, loggedInName, date, username, deathReason);
-      sendPushMessage(status, itemName);
+      sendPushMessage(status, itemName,"Compact");
       if (status == "Borrowed") {
         borrowUserController.clear();
         setState(() {

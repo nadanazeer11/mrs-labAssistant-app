@@ -14,6 +14,7 @@ class ProjectDContr{
   FirebaseFirestore _db=FirebaseFirestore.instance;
 
   Future<Notes> getNoteById(String ?id) async {
+    debugPrint("immmmmmmmmmm heeeeeeeeeeeeeeeeeeere");
     try{
       DocumentSnapshot noteSnapshot = await FirebaseFirestore.instance
           .collection('notes')
@@ -176,5 +177,39 @@ class ProjectDContr{
     final file = File('${dir.path}/$filename');
     await file.writeAsBytes(bytes, flush: true);
     return file;
+  }
+  Future<List<String>> getUsers(String? id) async{
+    try{
+      debugPrint("id el note $id");
+      List<String> tokens=[];
+      final docSnapshot =await _db.collection('projects').doc(id).get();
+      if (!docSnapshot.exists) {
+        throw Exception('Project with ID $id does not exist');
+      }
+
+      final data = docSnapshot.data();
+      if (data == null) {
+        throw Exception('Project data is null');
+      }
+
+      final users = data['users'];
+      if (users == null || !(users is List<dynamic>)) {
+        throw Exception('Invalid users field in project data');
+      }
+      List<String> x=List<String>.from(users);
+      for (String  m in x){
+        final querySnapshot=await _db.collection('users').where('name',isEqualTo: m).get();
+        String id=querySnapshot.docs.first.get('token');
+        debugPrint("token el notes $id");
+        tokens.add(id);
+
+      }
+      return tokens;
+
+    }
+    catch(e){
+      throw Exception();
+
+    }
   }
 }

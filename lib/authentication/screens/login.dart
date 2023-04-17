@@ -78,7 +78,17 @@ class _LoginState extends State<Login> {
               _loading = false;
               errorMessage = "";
             });
-            await authenticate.checkToken(emailController.text.trim().toLowerCase());
+            try{
+              await authenticate.checkToken(emailController.text.trim().toLowerCase());
+
+            }
+            catch(e){
+              setState(() {
+                _loading = false;
+                errorMessage = "Error loading token of device,please try again";
+              });
+
+            }
             Navigator.popAndPushNamed(context, '/home');
           }
         }
