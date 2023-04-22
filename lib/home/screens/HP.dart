@@ -133,7 +133,7 @@ class _HPState extends State<HP> {
   ];
   int indexx=0;
   void onItemTapped(int index){
-
+    debugPrint("on item");
     setState((){
       indexx=index;
       debugPrint("the index$index");
@@ -240,6 +240,7 @@ class _HPState extends State<HP> {
         }
       }
       else if(notifType=="2"){
+        //change in inventory
         // debugPrint("dost 3ala notifcation el ineventoooooooooooooooooooooooooooooooooooory");
         // final navigator = Navigator.of(context);
         // final stack = navigator.widget.pages;
@@ -255,8 +256,12 @@ class _HPState extends State<HP> {
         //   Navigator.pushNamed(context, '/home');
         // }
         if (Navigator.of(context).canPop()) {
-          Navigator.pushNamed(context, '/home');
           onItemTapped(1);
+          Navigator.pushNamed(context, '/home');
+          debugPrint("here before onitemTapped");
+
+          debugPrint("here after onitemTapped");
+
         } else {
           onItemTapped(1);
         }

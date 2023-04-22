@@ -46,7 +46,8 @@ class _fileScreenState extends State<fileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                    Text("${args.baseName}",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),),
+                    Expanded(child: Text("${args.baseName}",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400,overflow: TextOverflow.ellipsis),)),
+                    //   Tooltip(message: args.baseName, child: Text("... ${args.baseName?.substring(0, 10)}" ) ),
                     loading==true ? CircularProgressIndicator():IconButton(onPressed: ()async {
                       setState(() {
                         loading=true;

@@ -375,7 +375,8 @@ class _Inventory5State extends State<Inventory5> {
 
               Row(
                 children: [
-                  initialValue=="loose"?SizedBox(
+                  initialValue=="loose"?
+                  SizedBox(
                     width: w * 0.85,
                     child: TextField(
                       controller: searchController,

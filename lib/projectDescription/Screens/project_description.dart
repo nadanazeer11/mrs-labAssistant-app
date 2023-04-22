@@ -57,6 +57,10 @@ class _ProjDescripState extends State<ProjDescrip> {
   bool sendButton=true;
   bool stop=false;
   List<String> userss=[];
+  String? searchWord;
+  var searchController = TextEditingController();
+  bool dontShowAlert=false;
+
 
   Future<String> selectFile()async {
     final result=await FilePicker.platform.pickFiles();
@@ -98,19 +102,26 @@ class _ProjDescripState extends State<ProjDescrip> {
 
       }
     else{
-      final snapshot=await task!.whenComplete((){});
-      final urlDownload=await snapshot.ref.getDownloadURL();
-      setState(() {
-        url=urlDownload;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Document successfully uploaded!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if(!stop){
+        final snapshot=await task!.whenComplete((){});
+        final urlDownload=await snapshot.ref.getDownloadURL();
+        setState(() {
+          url=urlDownload;
+        });
+        if(!stop){
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Document successfully uploaded!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          debugPrint("Download linkkkkkkkkkkkkkkkkkkkk $urlDownload");
+        }
 
-      debugPrint("Download linkkkkkkkkkkkkkkkkkkkk $urlDownload");
+      }
+
+
+
     }
 
 
@@ -411,7 +422,7 @@ class _ProjDescripState extends State<ProjDescrip> {
       child: DraggableScrollableSheet(
           initialChildSize: initialChildSize,
           maxChildSize: 0.7,
-          minChildSize: 0,
+          minChildSize: 0.1,
           builder: (context, scrollController){
             return Container(
               clipBehavior: Clip.hardEdge,
@@ -427,7 +438,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                       child: Row(
                         children: [
                           const Text("Notes:",style: TextStyle(fontSize: 21,fontWeight: FontWeight.w500,color: Colors.white),),
@@ -436,8 +447,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                               addMyComment=true;
                               sendButton=true;
                               stop=false;
+                              dontShowAlert=false;
                             });
-                          }, icon: const Icon(Icons.add)):Container(),
+                          }, icon: const Icon(Icons.add,color: Colors.white,)):Container(),
                         ],
                       ),
                     ),
@@ -494,7 +506,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(
-                                        color: Colors.black,
+                                        color: Colors.white,
                                         width: 1.0,
                                       ),
                                       borderRadius: BorderRadius.circular(10.0),
@@ -507,6 +519,13 @@ class _ProjDescripState extends State<ProjDescrip> {
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                                         hintText: 'Add a comment',
                                         border: InputBorder.none,
+                                        labelStyle: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      style: TextStyle(
+                                        color: Colors.white,
+
                                       ),
                                     ),
                                   ),
@@ -554,10 +573,12 @@ class _ProjDescripState extends State<ProjDescrip> {
                                        addMyComment=false;
                                        url="";
                                        stop=true;
+                                       dontShowAlert=true;
+
 
                                       });
                                       _notesText.clear();
-                                    }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: AppColorss.redColor),)),
+                                    }, child:Text("Cancel",style: TextStyle(fontSize: 18,color: Colors.black),)),
                                     sendButton==true?TextButton(onPressed: ()async {
                                       setState(() {
                                         sendButton=false;
@@ -579,7 +600,47 @@ class _ProjDescripState extends State<ProjDescrip> {
                         ),
                     ),
                   ):Container(),
-                    const SizedBox(height: 15,),
+                    const SizedBox(height: 4,),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: w * 0.85,
+                        child: TextField(
+
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search using id/name...',
+                            filled: true,
+                            fillColor: Colors.white24,
+                            prefixIcon: searchWord == null
+                                ? IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  searchWord =
+                                      searchController.text;
+                                });
+                              },
+                              icon: const Icon(Icons.search),
+                            )
+                                : IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  searchWord = null;
+                                  searchController.clear();
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+
+                            contentPadding: const EdgeInsets.all(8),
+                          ),
+                        ),
+                      ),
+                    ),
 
 
                     steps(context,ids),
@@ -632,11 +693,14 @@ class _ProjDescripState extends State<ProjDescrip> {
               bool? public =projNotes?[index].public;
               String? baseNamee=projNotes?[index].baseName;
               String ? urll=projNotes?[index].url;
+              String  user=projNotes?[index].user?? "no";
+              String  text=projNotes?[index].note ?? "";
               if(public==true||allow==true){
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(4,0,3,27),
-                  child:
-                  Container(
+                if(searchWord==null){
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(4,0,3,27),
+                    child:
+                    Container(
                       margin:const EdgeInsets.fromLTRB(4, 0, 3, 0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
@@ -684,8 +748,9 @@ class _ProjDescripState extends State<ProjDescrip> {
                                 public == true
                                     ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                     : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
-                               PlayPauseButton(text: projNotes?[index].note),
-                                baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(
+                                PlayPauseButton(text: projNotes?[index].note),
+                                baseNamee!="No file Selected" ? Expanded(child:
+                                Align(alignment:Alignment.bottomRight,child: TextButton(
                                     onPressed: () async {
                                       bool hasPdfExtension = baseNamee?.toLowerCase().endsWith('.pdf') ?? false;
                                       if(hasPdfExtension){
@@ -725,9 +790,112 @@ class _ProjDescripState extends State<ProjDescrip> {
                           ],
                         ),
                       ),
-                     ),
-                );
+                    ),
+                  );
 
+                }
+                else{
+                  String sw=searchWord?? "zero";
+                  debugPrint("search word $sw $user $text");
+
+                  if(sw==user|| text.contains(sw)){
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(4,0,3,27),
+                      child:
+                      Container(
+                        margin:const EdgeInsets.fromLTRB(4, 0, 3, 0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children:[
+                                    Icon(Icons.access_time_sharp,size: 15,color: AppColorss.darkFontGrey,),
+                                    Text('$time,$datee',style: TextStyle(fontSize: 14,color: AppColorss.fontGrey),),
+                                  ]),
+                              const SizedBox(height:3),
+                              Row(
+                                children: [
+                                  const CircleAvatar(
+                                    radius: 21,
+                                    // add avatar image or tex
+                                  ),
+                                  SizedBox(width: 15),
+                                  Expanded(
+                                    child: SizedBox(
+                                      child: Text(
+                                        projNotes?[index].note?? 'N/A',
+                                        style: const TextStyle(fontSize: 16,color: Colors.black),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  public == true
+                                      ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
+                                      : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
+                                  PlayPauseButton(text: projNotes?[index].note),
+                                  baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(
+                                      onPressed: () async {
+                                        bool hasPdfExtension = baseNamee?.toLowerCase().endsWith('.pdf') ?? false;
+                                        if(hasPdfExtension){
+                                          final file = await pdc.loadFirebase(baseNamee!);
+                                          if (file == null) return;
+                                          openPDF(context, file);
+                                        }
+                                        else{
+                                          bool isImage = baseNamee != null &&
+                                              (baseNamee.toLowerCase().endsWith('.jpg') ||
+                                                  baseNamee.toLowerCase().endsWith('.jpeg') ||
+                                                  baseNamee.toLowerCase().endsWith('.png') ||
+                                                  baseNamee.toLowerCase().endsWith('.gif') ||
+                                                  baseNamee.toLowerCase().endsWith('.bmp'));
+                                          if(isImage){
+                                            debugPrint("this is an image");
+                                            Navigator.pushNamed(context, '/fileScreen',arguments:FileObj(baseName: baseNamee, url: urll));
+                                          }
+                                          else{
+                                            bool isVideo = baseNamee != null &&
+                                                (baseNamee.toLowerCase().endsWith('.mp4') ||
+                                                    baseNamee.toLowerCase().endsWith('.mov') ||
+                                                    baseNamee.toLowerCase().endsWith('.avi') ||
+                                                    baseNamee.toLowerCase().endsWith('.wmv') ||
+                                                    baseNamee.toLowerCase().endsWith('.mkv'));
+                                            if(isVideo){
+
+                                            }
+                                          }
+
+                                        }
+
+                                      },
+                                      child: Text("$baseNamee",style: const TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+
+                  }
+                }
               }
               return Container();
             },

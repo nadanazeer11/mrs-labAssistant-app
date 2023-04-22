@@ -273,14 +273,17 @@ class _Create_ProjectState extends State<Create_Project> {
                       padding: const EdgeInsets.only(top: 15.0),
                       child: Text("${_error ?? ''}", style: TextStyle(color: Colors.redAccent)),
                     ),
-               loading==true?CircularProgressIndicator(): ElevatedButton(onPressed:
+                ElevatedButton(onPressed:
                     _allFieldsEntered? (){
                         submitProject();
                     }:(){
                   setState(() {_error = "Please fill out all fields!";});
-                    }, child: Text("Create",style: subHeadingStyle,),   style: ElevatedButton.styleFrom(
+                    },   style: ElevatedButton.styleFrom(
                         backgroundColor:_allFieldsEntered? AppColorss.darkmainColor:Colors.grey,// Set the background color
-                      ),)
+                      ), child:loading==true?const CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                ):
+               Text("Create",style: subHeadingStyle,),)
               ],),
             ],
           ),

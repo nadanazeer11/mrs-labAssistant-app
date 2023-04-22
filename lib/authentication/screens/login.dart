@@ -254,8 +254,8 @@ class _LoginState extends State<Login> {
                   )
               ),
               SizedBox(height: 18),
-              _loading ? Container(child: Center(child: CircularProgressIndicator(),),):
-              ElevatedButton(onPressed: (){ _submitLogin();}, child:  Text('Log In'),
+              ElevatedButton(onPressed: (){ _submitLogin();}, child:
+              _loading ?CircularProgressIndicator(): Text('Log In'),
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
                       Color(0xFF005466),
