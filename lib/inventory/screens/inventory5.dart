@@ -1967,11 +1967,12 @@ class _Inventory5State extends State<Inventory5> {
           ),
         ),
       ),
-      content: SizedBox(
-        width: screenWidth * 0.99,
-        child: SingleChildScrollView(
-          child: Container(
-            width: double.maxFinite,
+      content: SingleChildScrollView(
+        child: Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          child:
+          SingleChildScrollView(
             child: Column(
               children: [
                 ListView.builder(
@@ -2252,13 +2253,23 @@ class _Inventory5State extends State<Inventory5> {
                 }
               },
             ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(13.0),
-                child: Text(
-                  itemName2,
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+            // Center(
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(13.0),
+            //     child: Text(
+            //       "sssssssssssssssssssssssssssssssssssssss",
+            //       style: TextStyle(color: Colors.white, fontSize: 24),
+            //     ),
+            //   ),
+            // ),
+            Flexible(
+              child: Text(
+                itemName2,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -2624,16 +2635,44 @@ class _Inventory5State extends State<Inventory5> {
             )
 
                 : Container(),
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(13.0),
-                child: Text(
-                  itemName2,
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+            // Align(
+            //   alignment: Alignment.topRight,
+            //   child:Expanded(
+            //     child: Container(
+            //       child: Text(
+            //         "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            //         style: TextStyle(
+            //           color: Colors.white,
+            //           fontSize: 24,
+            //           overflow: TextOverflow.ellipsis,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            //
+            //   // child: Padding(
+            //   //   padding: const EdgeInsets.all(13.0),
+            //   //   child: Expanded(
+            //   //
+            //   //       child: Text(
+            //   //         itemName2,
+            //   //         style: TextStyle(color: Colors.white, fontSize: 24,overflow: TextOverflow.ellipsis),
+            //   //       ),
+            //   //
+            //   //   ),
+            //   // ),
+            // ),
+            Flexible(
+              child: Text(
+                itemName2,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+
           ],
         ),
       ),

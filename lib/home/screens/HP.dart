@@ -19,6 +19,8 @@ import '../../inventory/backend/inventContr.dart';
 import '../../inventory/screens/inventory5.dart';
 import 'package:http/http.dart' as http;
 
+import '../../main.dart';
+
 
 class HP extends StatefulWidget {
   const HP({Key? key}) : super(key: key);
@@ -233,10 +235,19 @@ class _HPState extends State<HP> {
       if(notifType=="1"){
         if(projectId!=null){
           debugPrint("dost 3ala $projectId");
-        Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
+        // Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
         //   if (ModalRoute.of(context)?.settings.name != '/projectDetails') {
         //     Navigator.pushNamed(context, '/projectDetails', arguments: {'id': projectId});
         //   }
+        //   Navigator.pushNamed(
+        //       navigatorKey.currentState.context,
+        //       '/projectDetails'
+        //      );
+        //   navigatorKey.currentState?.pushNamed('/projectDetails');
+          navigatorKey.currentState?.pushNamed(
+              '/projectDetails', arguments: {'id': projectId}
+          );
+
         }
       }
       else if(notifType=="2"){
@@ -265,6 +276,7 @@ class _HPState extends State<HP> {
         } else {
           onItemTapped(1);
         }
+
 
       }
 

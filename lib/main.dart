@@ -15,7 +15,7 @@ import 'package:mrs/projectDescription/Screens/project_description.dart';
 import 'package:mrs/splash_screen.dart';
 import 'package:mrs/user_state.dart';
 
-
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +48,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

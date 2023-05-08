@@ -756,7 +756,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       if(hasPdfExtension){
                                         final file = await pdc.loadFirebase(baseNamee!);
                                         if (file == null) return;
-                                        openPDF(context, file);
+                                        openPDF(context, file,urll,baseNamee);
                                       }
                                       else{
                                         bool isImage = baseNamee != null &&
@@ -857,7 +857,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                         if(hasPdfExtension){
                                           final file = await pdc.loadFirebase(baseNamee!);
                                           if (file == null) return;
-                                          openPDF(context, file);
+                                          openPDF(context, file,urll,baseNamee);
                                         }
                                         else{
                                           bool isImage = baseNamee != null &&
@@ -911,9 +911,9 @@ class _ProjDescripState extends State<ProjDescrip> {
       }
     );
   }
-  void openPDF(BuildContext context, File file) {
+  void openPDF(BuildContext context, File file, String? urll, String baseNamee) {
       Navigator.of(context).push(
-    MaterialPageRoute(builder: (context) => PDFViewerPage(file: file)),
+    MaterialPageRoute(builder: (context) => PDFViewerPage(file: file,url:urll,basenamee: baseNamee,)),
     );
   }
 
@@ -930,11 +930,7 @@ class _ProjDescripState extends State<ProjDescrip> {
     //await _try();
     // await saveFile();
   }
-  Future<void> _try()async{
-    final ref=FirebaseStorage.instance.ref().child("images.png");
-    final url=await ref.getDownloadURL();
-    debugPrint("images url $url");
-  }
+
   Future<void> _getLoggedInName()async{
     try {
       String x=await getLoggedInName();
@@ -978,12 +974,7 @@ class _ProjDescripState extends State<ProjDescrip> {
       debugPrint("error in see");
     }
   }
-  Future<void> saveFile() async {
-    final file = File('${(await getApplicationDocumentsDirectory()).path}/example.txt');
-    await file.create();
-    await file.writeAsString('Hello, World!');
-    debugPrint("creaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate");
-  }
+
 }
 
 class PlayPauseButton extends StatefulWidget {
