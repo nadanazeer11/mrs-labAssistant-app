@@ -41,7 +41,7 @@ class _YourProjectsState extends State<YourProjects> {
                 children: [
                   Row(
                     children: [
-                      Text("Your Projects",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),),
+                      Text("MRS Projects",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),),
                       PopupMenuButton(
                         icon: Icon(Icons.filter_alt_rounded,color: AppColorss.darkmainColor,),
                         itemBuilder: (BuildContext context)=>[

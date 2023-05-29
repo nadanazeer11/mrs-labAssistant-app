@@ -375,7 +375,8 @@ class _AddItemState extends State<AddItem> {
                   return AlertDialog(
                       backgroundColor: Colors.white,
                       titlePadding: EdgeInsets.zero,
-                      title: Container(
+                      title:
+                      Container(
                         decoration: BoxDecoration(color:AppColorss.lightmainColor),
                         child: Center(
                           child: Padding(

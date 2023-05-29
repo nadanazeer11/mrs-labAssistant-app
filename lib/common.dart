@@ -58,6 +58,6 @@ Future<String> getemail()async{
     return documentSnapshot.get('email');
   }
   catch(e){
-    throw Exception("d");
+    throw Exception("user not found");
   }
 }

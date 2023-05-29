@@ -188,7 +188,7 @@ class _CreateUState extends State<CreateU> {
                         return null;
                     }),
             ),
-                emailTaken==true?Text("*Email is taken",style: TextStyle(color: Colors.red),):Container(),
+                emailTaken==true?Text("*User already exists",style: TextStyle(color: Colors.red),):Container(),
 
                 const SizedBox(height: 35,),
                 FractionallySizedBox(

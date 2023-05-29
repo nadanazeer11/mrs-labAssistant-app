@@ -229,7 +229,7 @@ class _Create_ProjectState extends State<Create_Project> {
       appBar: AppBar(
         backgroundColor:AppColorss.lightmainColor ,
         elevation: 0,
-        title:Text("MRSss",style:subHeadingStyle) ,
+        title:Text("MRS",style:subHeadingStyle) ,
         actions: [
           IconButton(onPressed: ()async{
             debugPrint("getting token");

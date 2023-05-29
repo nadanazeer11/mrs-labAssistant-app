@@ -70,7 +70,6 @@ class _ProjDescripState extends State<ProjDescrip> {
       file=File(path);
       fileName=basename(basename(file!.path));
     });
-    debugPrint("ya nada $fileName");
     return fileName;
 
   }
@@ -84,6 +83,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
    });
     if (task ==null){
+      //error occured
      return  showPlatformDialog(
           context: context,
           builder: (context) => BasicDialogAlert(
@@ -128,6 +128,8 @@ class _ProjDescripState extends State<ProjDescrip> {
   debugPrint("upload file with name $fileName");
   }
   Future<void> sendNote(String text,BuildContext context,String ? title)async{
+    debugPrint("ya nada");
+    debugPrint("y a $switchPublic");
     try{
       await uploadFile(context);
       try{
@@ -135,7 +137,7 @@ class _ProjDescripState extends State<ProjDescrip> {
         bool z=isSelected[0]==true ? true : false;
         if(stop==false){
           if(url=="" || fileName=="No file Selected"){
-            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:"",baseName:"No file Selected");
+            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:switchPublic,url:"",baseName:"No file Selected");
             await pdc.addNote(note,id);
             setState(() {
               setState(() {
@@ -151,7 +153,8 @@ class _ProjDescripState extends State<ProjDescrip> {
 
           }
           else if(url != "" && fileName!="No file Selected"){
-            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:z,url:url,baseName:fileName);
+            debugPrint("swi $switchPublic");
+            Notes note=Notes(note:text,user: loggedInName,time:Timestamp.fromDate(x),public:switchPublic,url:url,baseName:fileName);
             await pdc.addNote(note,id);
             setState(() {
               setState(() {
@@ -421,7 +424,7 @@ class _ProjDescripState extends State<ProjDescrip> {
       height: h,
       child: DraggableScrollableSheet(
           initialChildSize: initialChildSize,
-          maxChildSize: 0.7,
+          maxChildSize: 0.8,
           minChildSize: 0.1,
           builder: (context, scrollController){
             return Container(
@@ -491,6 +494,7 @@ class _ProjDescripState extends State<ProjDescrip> {
                                             onChanged: (bool value){
                                               setState(() {
                                                 switchPublic=value;
+                                                debugPrint("switch puuuuuuuublic $switchPublic");
                                               });},
                                             value: switchPublic,
                                             activeColor: AppColorss.activeColor,
@@ -609,7 +613,7 @@ class _ProjDescripState extends State<ProjDescrip> {
 
                           controller: searchController,
                           decoration: InputDecoration(
-                            hintText: 'Search using id/name...',
+                            hintText: 'Search for text/user/file',
                             filled: true,
                             fillColor: Colors.white24,
                             prefixIcon: searchWord == null
@@ -695,6 +699,7 @@ class _ProjDescripState extends State<ProjDescrip> {
               String ? urll=projNotes?[index].url;
               String  user=projNotes?[index].user?? "no";
               String  text=projNotes?[index].note ?? "";
+              String basename22=baseNamee ?? "";
               if(public==true||allow==true){
                 if(searchWord==null){
                   return Padding(
@@ -727,17 +732,17 @@ class _ProjDescripState extends State<ProjDescrip> {
                             const SizedBox(height:3),
                             Row(
                               children: [
-                                const CircleAvatar(
-                                  radius: 21,
-                                  // add avatar image or tex
-                                ),
+                                // const CircleAvatar(
+                                //   radius: 21,
+                                //   // add avatar image or tex
+                                // ),
+                                Text( '@ ${projNotes?[index].user} ',overflow: TextOverflow.ellipsis,),
+
                                 SizedBox(width: 15),
                                 Expanded(
-                                  child: SizedBox(
-                                    child: Text(
-                                      projNotes?[index].note?? 'N/A',
-                                      style: const TextStyle(fontSize: 16,color: Colors.black),
-                                    ),
+                                  child: Text(
+                                    projNotes?[index].note?? 'N/A',
+                                    style: const TextStyle(fontSize: 16,color: Colors.black),
                                   ),
                                 ),
                               ],
@@ -798,7 +803,103 @@ class _ProjDescripState extends State<ProjDescrip> {
                   String sw=searchWord?? "zero";
                   debugPrint("search word $sw $user $text");
 
-                  if(sw==user|| text.contains(sw)){
+                  if( user.trim().toLowerCase().startsWith(sw.toLowerCase())|| text.trim().toLowerCase().contains(sw.trim().toLowerCase()) || basename22.trim().toLowerCase().contains(sw.trim().toLowerCase())){
+                    debugPrint("heeeeeeeeey");
+                    // return Padding(
+                    //   padding: const EdgeInsets.fromLTRB(4,0,3,27),
+                    //   child:
+                    //   Container(
+                    //     margin:const EdgeInsets.fromLTRB(4, 0, 3, 0),
+                    //     decoration: BoxDecoration(
+                    //       borderRadius: BorderRadius.circular(10.0),
+                    //       color: Colors.white,
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: Colors.grey.withOpacity(0.5),
+                    //           spreadRadius: 2,
+                    //           blurRadius: 5,
+                    //           offset: Offset(0, 3),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(8.0),
+                    //       child: Column(
+                    //         children: [
+                    //           Row(
+                    //               mainAxisAlignment: MainAxisAlignment.end,
+                    //               children:[
+                    //                 Icon(Icons.access_time_sharp,size: 15,color: AppColorss.darkFontGrey,),
+                    //                 Text('$time,$datee',style: TextStyle(fontSize: 14,color: AppColorss.fontGrey),),
+                    //               ]),
+                    //           const SizedBox(height:3),
+                    //           Row(
+                    //             children: [
+                    //               // const CircleAvatar(
+                    //               //   radius: 21,
+                    //               //   // add avatar image or tex
+                    //               // ),
+                    //               Expanded(child: Text( '@ ${projNotes?[index].user} ')),
+                    //               SizedBox(width: 15),
+                    //               Expanded(
+                    //                 child: SizedBox(
+                    //                   child: Text(
+                    //                     projNotes?[index].note?? 'N/A',
+                    //                     style: const TextStyle(fontSize: 16,color: Colors.black),
+                    //                   ),
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //           Row(
+                    //             // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //             children: [
+                    //               public == true
+                    //                   ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
+                    //                   : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
+                    //               PlayPauseButton(text: projNotes?[index].note),
+                    //               baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(
+                    //                   onPressed: () async {
+                    //                     bool hasPdfExtension = baseNamee?.toLowerCase().endsWith('.pdf') ?? false;
+                    //                     if(hasPdfExtension){
+                    //                       final file = await pdc.loadFirebase(baseNamee!);
+                    //                       if (file == null) return;
+                    //                       openPDF(context, file,urll,baseNamee);
+                    //                     }
+                    //                     else{
+                    //                       bool isImage = baseNamee != null &&
+                    //                           (baseNamee.toLowerCase().endsWith('.jpg') ||
+                    //                               baseNamee.toLowerCase().endsWith('.jpeg') ||
+                    //                               baseNamee.toLowerCase().endsWith('.png') ||
+                    //                               baseNamee.toLowerCase().endsWith('.gif') ||
+                    //                               baseNamee.toLowerCase().endsWith('.bmp'));
+                    //                       if(isImage){
+                    //                         debugPrint("this is an image");
+                    //                         Navigator.pushNamed(context, '/fileScreen',arguments:FileObj(baseName: baseNamee, url: urll));
+                    //                       }
+                    //                       else{
+                    //                         bool isVideo = baseNamee != null &&
+                    //                             (baseNamee.toLowerCase().endsWith('.mp4') ||
+                    //                                 baseNamee.toLowerCase().endsWith('.mov') ||
+                    //                                 baseNamee.toLowerCase().endsWith('.avi') ||
+                    //                                 baseNamee.toLowerCase().endsWith('.wmv') ||
+                    //                                 baseNamee.toLowerCase().endsWith('.mkv'));
+                    //                         if(isVideo){
+                    //
+                    //                         }
+                    //                       }
+                    //
+                    //                     }
+                    //
+                    //                   },
+                    //                   child: Text("$baseNamee",style: const TextStyle(decoration: TextDecoration.underline,color: Colors.blue),)))):Container(),
+                    //             ],
+                    //           )
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   ),
+                    // );
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(4,0,3,27),
                       child:
@@ -829,17 +930,17 @@ class _ProjDescripState extends State<ProjDescrip> {
                               const SizedBox(height:3),
                               Row(
                                 children: [
-                                  const CircleAvatar(
-                                    radius: 21,
-                                    // add avatar image or tex
-                                  ),
+                                  // const CircleAvatar(
+                                  //   radius: 21,
+                                  //   // add avatar image or tex
+                                  // ),
+                                  Text( '@ ${projNotes?[index].user} ',overflow: TextOverflow.ellipsis,),
+
                                   SizedBox(width: 15),
                                   Expanded(
-                                    child: SizedBox(
-                                      child: Text(
-                                        projNotes?[index].note?? 'N/A',
-                                        style: const TextStyle(fontSize: 16,color: Colors.black),
-                                      ),
+                                    child: Text(
+                                      projNotes?[index].note?? 'N/A',
+                                      style: const TextStyle(fontSize: 16,color: Colors.black),
                                     ),
                                   ),
                                 ],
@@ -851,7 +952,8 @@ class _ProjDescripState extends State<ProjDescrip> {
                                       ? Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.unlock, size: 16))
                                       : Align(alignment: Alignment.bottomLeft, child: Icon(FeatherIcons.lock, size: 16)),
                                   PlayPauseButton(text: projNotes?[index].note),
-                                  baseNamee!="No file Selected" ? Expanded(child: Align(alignment:Alignment.bottomRight,child: TextButton(
+                                  baseNamee!="No file Selected" ? Expanded(child:
+                                  Align(alignment:Alignment.bottomRight,child: TextButton(
                                       onPressed: () async {
                                         bool hasPdfExtension = baseNamee?.toLowerCase().endsWith('.pdf') ?? false;
                                         if(hasPdfExtension){

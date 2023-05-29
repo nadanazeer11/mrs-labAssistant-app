@@ -1246,16 +1246,27 @@ class _Inventory5State extends State<Inventory5> {
                         },
                       )
                     : Container(),
-            Align(
-              alignment: Alignment.topRight,
+            // Align(
+            //   alignment: Alignment.topRight,
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(13.0),
+            //     child: Text(
+            //       itemName2,
+            //       style: TextStyle(color: Colors.white, fontSize: 24),
+            //     ),
+            //   ),
+            // ),
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(13.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  itemName2,
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  " $itemName2",
+                  textAlign: TextAlign.center,
+                  style:  TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),
             ),
+
           ],
         ),
       ),
@@ -1481,12 +1492,23 @@ class _Inventory5State extends State<Inventory5> {
                       }
                     },
                   ),
-            Center(
+            // Center(
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(13.0),
+            //     child: Text(
+            //       itemName2,
+            //       style: TextStyle(color: Colors.white, fontSize: 24),
+            //       overflow: TextOverflow.ellipsis,
+            //     ),
+            //   ),
+            // ),
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(13.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
                   itemName2,
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  textAlign: TextAlign.center,
+                  style:  TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),
             ),
@@ -1553,18 +1575,48 @@ class _Inventory5State extends State<Inventory5> {
             return AlertDialog(
                 backgroundColor: Colors.white,
                 titlePadding: EdgeInsets.zero,
+                //title:
+                // Container(
+                //   decoration: BoxDecoration(color: AppColorss.lightmainColor),
+                //   child:
+                //   // Expanded(
+                //   //   child: Text(
+                //   //     itemName2,
+                //   //     textAlign: TextAlign.center,
+                //   //     style:  TextStyle(color: Colors.white, fontSize: 24),
+                //   //   ),
+                //   // ),
+                //   Expanded(
+                //   child: Padding(
+                //   padding: const EdgeInsets.all(8.0),
+                //   child: Text(
+                //   itemName2,
+                //   textAlign: TextAlign.center,
+                //   style:  TextStyle(color: Colors.white, fontSize: 24),
+                //   ),
+                //   ),
+                // ),
+                // ),
                 title: Container(
                   decoration: BoxDecoration(color: AppColorss.lightmainColor),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(13.0),
-                      child: Text(
-                        itemName2,
-                        style: TextStyle(color: Colors.white, fontSize: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            itemName2,
+                            textAlign: TextAlign.center,
+                            style:  TextStyle(color: Colors.white, fontSize: 24),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
+
+
+
                 content: SingleChildScrollView(
                     child: Container(
                   width: double.maxFinite,
@@ -1805,18 +1857,49 @@ class _Inventory5State extends State<Inventory5> {
           return AlertDialog(
               backgroundColor: Colors.white,
               titlePadding: EdgeInsets.zero,
+              // title: Container(
+              //   decoration: BoxDecoration(color: AppColorss.lightmainColor),
+              //   child:
+              //   // Center(
+              //   //   child: Padding(
+              //   //     padding: const EdgeInsets.all(13.0),
+              //   //     child:
+              //   //     Text(
+              //   //       itemName2,
+              //   //       style: TextStyle(color: Colors.white, fontSize: 24),
+              //   //     ),
+              //   //   ),
+              //   // ),
+              //   Expanded(
+              //   child: Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Text(
+              //   itemName2,
+              //   textAlign: TextAlign.center,
+              //   style:  TextStyle(color: Colors.white, fontSize: 24),
+              //   ),
+              //   ),
+              // ),),
               title: Container(
                 decoration: BoxDecoration(color: AppColorss.lightmainColor),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(13.0),
-                    child: Text(
-                      itemName2,
-                      style: TextStyle(color: Colors.white, fontSize: 24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          itemName2,
+                          textAlign: TextAlign.center,
+                          style:  TextStyle(color: Colors.white, fontSize: 24),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
+
+
+
               content: SingleChildScrollView(
                   child: Container(
                 width: double.maxFinite,
@@ -2253,25 +2336,27 @@ class _Inventory5State extends State<Inventory5> {
                 }
               },
             ),
-            // Center(
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(13.0),
-            //     child: Text(
-            //       "sssssssssssssssssssssssssssssssssssssss",
-            //       style: TextStyle(color: Colors.white, fontSize: 24),
+            // Flexible(
+            //   child: Text(
+            //     "itemName2",
+            //
+            //
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontSize: 24,
             //     ),
+            //     overflow: TextOverflow.ellipsis,
             //   ),
             // ),
-            Flexible(
-              child: Text(
-                itemName2,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+            Expanded(
+            child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+            itemName2,
+            textAlign: TextAlign.center,
+            style:  TextStyle(color: Colors.white, fontSize: 24),
             ),
+            ),),
           ],
         ),
       ),
@@ -2321,16 +2406,25 @@ class _Inventory5State extends State<Inventory5> {
         decoration: BoxDecoration(color: AppColorss.lightmainColor),
         child: Row(
           children: [
-
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(13.0),
-                child: Text(
-                  itemName2,
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ),
-            ),
+        Expanded(
+        child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          itemName2,
+          textAlign: TextAlign.center,
+          style:  TextStyle(color: Colors.white, fontSize: 24),
+        ),
+      ),
+        ),
+            // Center(
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(13.0),
+            //     child: Text(
+            //       itemName2,
+            //       style: TextStyle(color: Colors.white, fontSize: 24),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -2373,7 +2467,18 @@ class _Inventory5State extends State<Inventory5> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text("Delete $itemName2"),
+              title:
+              Expanded(
+                child: Padding(
+                padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Delete $itemName2",
+            textAlign: TextAlign.center,
+            style:  TextStyle(color: Colors.white, fontSize: 24),
+            ),
+            ),
+              ),
+              // Text("Delete $itemName2"),
               content: Text("Are you sure you want to delete?"),
               actions: <Widget>[
                 TextButton(
@@ -2436,17 +2541,31 @@ class _Inventory5State extends State<Inventory5> {
             return AlertDialog(
                 backgroundColor: Colors.white,
                 titlePadding: EdgeInsets.zero,
-                title: Container(
+                title:
+                Container(
                   decoration: BoxDecoration(color: AppColorss.lightmainColor),
-                  child: Center(
+                  child:
+                  // Center(
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(13.0),
+                  //     child: Text(
+                  //       itemName2,
+                  //       style: TextStyle(color: Colors.white, fontSize: 24),
+                  //     ),
+                  //   ),
+                  // ),
+                  Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(13.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        itemName2,
-                        style: TextStyle(color: Colors.white, fontSize: 24),
+                        "Delete $itemName2",
+                        textAlign: TextAlign.center,
+                        style:  TextStyle(color: Colors.white, fontSize: 24),
                       ),
                     ),
                   ),
+
+
                 ),
                 content: SingleChildScrollView(
                     child: Container(
@@ -2662,14 +2781,24 @@ class _Inventory5State extends State<Inventory5> {
             //   //   ),
             //   // ),
             // ),
-            Flexible(
-              child: Text(
-                itemName2,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+            // Flexible(
+            //   child: Text(
+            //     itemName2,
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontSize: 24,
+            //     ),
+            //     overflow: TextOverflow.ellipsis,
+            //   ),
+            // ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Delete $itemName2",
+                  textAlign: TextAlign.center,
+                  style:  TextStyle(color: Colors.white, fontSize: 24),
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
 

@@ -60,7 +60,6 @@ class _OurProjectsState extends State<OurProjects> {
             );
             // Show error message
           }
-
           else if (snapshot.connectionState == ConnectionState.active){
             if(snapshot.hasData){
               List<Project> ?allProjects=snapshot.data;
@@ -72,13 +71,13 @@ class _OurProjectsState extends State<OurProjects> {
                   children: [
                     Row(
                       children: [
-                        Text("Your Projects",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),),
+                        Text("MRS Projects",style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),),
                         PopupMenuButton(
                           icon: Icon(Icons.filter_alt_rounded,color: AppColorss.darkmainColor,),
                           itemBuilder: (BuildContext context)=>[
                             PopupMenuItem(
                               child: Text('My Projects'),
-                              value: "Me",
+                              value: "Mine",
                             ),
                             PopupMenuItem(
                               child: Text("Late Projects"),
@@ -111,10 +110,15 @@ class _OurProjectsState extends State<OurProjects> {
                           onTap: (){setState(() {
                             filter=null;
                           });},
-                          child: Text("Clear Filter",style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: AppColorss.darkmainColor,fontWeight: FontWeight.bold,
-                              fontSize: 23),),
+                          child: Row(
+                            children: [
+                              Text("$filter",style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: AppColorss.darkmainColor,fontWeight: FontWeight.bold,
+                                  fontSize: 23),),
+                              Icon(Icons.close)
+                            ],
+                          ),
                         ):Container()
                       ],
                     ),
@@ -193,7 +197,7 @@ class _OurProjectsState extends State<OurProjects> {
                                 return Container();
                               }
                             }
-                            else if(filter=="Me"){
+                            else if(filter=="Mine"){
                               List<String> users= project?.users ?? ["e"];
                               if( project?.users!=null){
                                 if(users.contains(loggedInName)){
