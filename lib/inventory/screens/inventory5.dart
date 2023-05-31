@@ -1186,7 +1186,8 @@ class _Inventory5State extends State<Inventory5> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             type == "Borrowed" && isAdmin == true
-                ? PopupMenuButton(
+                ?
+            PopupMenuButton(
                     icon: Icon(
                       Icons.settings,
                       color: Colors.white,

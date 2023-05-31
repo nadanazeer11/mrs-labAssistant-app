@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mrs/authentication/screens/createU.dart';
+import 'package:mrs/authentication/screens/editUsers.dart';
 import 'package:mrs/authentication/screens/forget_password.dart';
 import 'package:mrs/authentication/screens/signup_screen.dart';
 import 'package:mrs/createProject/screens/create_project.dart';
@@ -67,7 +68,8 @@ class MyApp extends StatelessWidget {
         '/createU':(context)=>CreateU(),
         '/fileScreen':(context)=>fileScreen(),
         '/imgScreen':(context)=>imgScreen(),
-        '/addItem':(context)=>AddItem()
+        '/addItem':(context)=>AddItem(),
+        '/editUsers':(context)=>editUsers()
       },
     );
   }

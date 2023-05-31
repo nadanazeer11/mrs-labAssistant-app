@@ -18,6 +18,7 @@ class Authenticate{
      String password=await getPassword();
       String? email=await getemail();
       userCredential = await auth.createUserWithEmailAndPassword(email: user.email, password: user.password);
+
       await _db.collection('users').add({
         "email":user.email,
         "password":user.password,
@@ -30,6 +31,7 @@ class Authenticate{
         "token":user.token
       });
       final User? user2=auth.currentUser;
+
       await auth.signOut();
       await auth.signInWithEmailAndPassword(email: email, password: password);
       //
@@ -102,34 +104,6 @@ class Authenticate{
       throw Exception("cant signout");
     }
   }
-  // Future<bool> checkPass(String? uid) async{
-  //   try{
-  //     DocumentSnapshot x=await _db.collection('users').doc(uid).get();
-  //     String pass=x.get('p')
-  //   }
-  // }
-
-  // Future<bool> changePassword(String currentPassword, String newPassword,String ? uid) async {
-  //   bool success = false;
-  //
-  //   //Create an instance of the current user.
-  //   var user = FirebaseAuth.instance.currentUser!;
-  //   //Must re-authenticate user before updating the password. Otherwise it may fail or user get signed out.
-  //
-  //   final cred = await EmailAuthProvider.credential(email: user.email!, password: currentPassword);
-  //   await user.reauthenticateWithCredential(cred).then((value) async {
-  //     await user.updatePassword(newPassword).then((_) {
-  //       success = true;
-  //       _db.collection('users').doc(uid).update({"password": newPassword});
-  //     }).catchError((error) {
-  //       print(error);
-  //     });
-  //   }).catchError((err) {
-  //     print(err);
-  //   });
-  //
-  //   return success;
-  // }
 
 
   Future<FirebaseAuthException?> changePassword(String currentPassword, String newPassword, String? uid) async {
@@ -169,5 +143,51 @@ class Authenticate{
 
 
   }
+  Future<List<Userr>> getAllUsers() async{
+    List<Userr> users = [];
+    try{
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .get();
+      snapshot.docs.forEach((doc) {
+        Userr user = Userr(
+          name: doc['name'],
+          email: doc['email'],
+          password: doc['password'],
+          projects: List<String>.from(doc['projects']),
+          tasks: List<String>.from(doc['tasks']),
+          createP: doc['createP'],
+          addU: doc['addU'],
+          inventoryM: doc['inventoryM'],
+          token: doc['token'],
+        );
+        users.add(user);
+      });
+    }
+    catch(e){
+      throw Exception("sorry cant get users");
+    }
+    return users;
+  }
+  Future<void> updateUser (String name,bool cu,bool mi,bool cp)async{
+  try{
+    final QuerySnapshot snapshot = await _db.collection('users')
+        .where('name', isEqualTo: name)
+        .get();
+    final DocumentSnapshot userDoc = snapshot.docs.first;
+    debugPrint("got the document ");
+    final String userId = userDoc.id;
+    debugPrint("id of document im trying to change");
+    await FirebaseFirestore.instance.collection('users').doc(userId).update(
+        {
+          'addU':cu,
+          'createP':cp,
+          'inventoryM':mi
+        });
 
+  }
+  catch(e){
+    throw Exception("hey");
+  }
+  }
 }

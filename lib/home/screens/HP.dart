@@ -500,7 +500,14 @@ class _HPState extends State<HP> {
                       height: 4,
                       color: Colors.black,
                     ),
-
+                    isLoading!=true&& isTrue==true? createU==true?ListTile(
+                      title:const Text('Edit Users',style: TextStyle(fontSize: 26,fontWeight: FontWeight.w400,color:Colors.black),),
+                      leading: Icon(FeatherIcons.edit,color: Colors.black,size: 30,),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/editUsers');
+                      },
+                    ):Container():Container(child:Text("error load again")),
                   ],
                 ),
               ),
