@@ -154,13 +154,13 @@ class _Create_ProjectState extends State<Create_Project> {
       });
       String title= _projectNameController.text;
       String text="You are assigned project $title by $loggedInName";
-      // _projectNameController.clear();
-      // _projectDescripController.clear();
+      _projectNameController.clear();
+      _projectDescripController.clear();
     try{
       List<String> tokens=await contr.getTokens(_selectedItems);
-      // setState(() {
-      //   _selectedItems=[];
-      // });
+      setState(() {
+        _selectedItems=[];
+      });
       sendPushMessage(title, text, tokens,idd);
 
 

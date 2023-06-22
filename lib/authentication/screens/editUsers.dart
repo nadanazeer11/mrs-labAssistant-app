@@ -391,20 +391,33 @@ class _editUsersState extends State<editUsers> {
                           BasicDialogAction(
                             title: Text("Yes"),
                             onPressed: () async{
+
                               Navigator.pop(context);
                               try{
                                 setState(() {
                                   popUpLoading2=true;
                                 });
-                                // await authh.updateUser(user.name,createU , createP, inventoryM);
+                                await authh.deleteUser(user.email,user.password);
                                 setState(() {
                                   popUpLoading2=false;
                                 });
                                 _getData();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('User ${user.name} successfully deleted!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+
 
                               }
                               catch(e){
-
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error deleting ${user.name}, please try again!'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
                               }
                             },
                           ),

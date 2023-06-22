@@ -37,7 +37,7 @@ class _CreateUState extends State<CreateU> {
       bool username;
       bool email;
       bool result;
-      Userr user=new Userr(name:_usernameController.text.trim().toLowerCase(),
+      Userr user=new Userr(uid:"",name:_usernameController.text.trim().toLowerCase(),
           email: _emailController.text.trim().toLowerCase(),
           password:_passwordController.text,
           projects: [],tasks: [],createP:CreateP,
@@ -238,7 +238,7 @@ class _CreateUState extends State<CreateU> {
                   ),
                 ),
                 const SizedBox(height:30),
-                Text("Privelages",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w400),),
+                Text("Priviliges",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w400),),
                 SwitchListTile(
                   title:const Text("Create Projects",style: TextStyle(fontSize: 20,color: Color.fromRGBO(62, 68, 71, 1)),),
                   onChanged: (bool value){

@@ -18,8 +18,9 @@ class Authenticate{
      String password=await getPassword();
       String? email=await getemail();
       userCredential = await auth.createUserWithEmailAndPassword(email: user.email, password: user.password);
-
+      final User? user2=auth.currentUser;
       await _db.collection('users').add({
+        "uid":user2?.uid,
         "email":user.email,
         "password":user.password,
         "name":user.name,
@@ -30,7 +31,7 @@ class Authenticate{
         "inventoryM":user.inventoryM,
         "token":user.token
       });
-      final User? user2=auth.currentUser;
+
 
       await auth.signOut();
       await auth.signInWithEmailAndPassword(email: email, password: password);
@@ -151,6 +152,7 @@ class Authenticate{
           .get();
       snapshot.docs.forEach((doc) {
         Userr user = Userr(
+          uid: doc['uid'],
           name: doc['name'],
           email: doc['email'],
           password: doc['password'],
@@ -189,5 +191,39 @@ class Authenticate{
   catch(e){
     throw Exception("hey");
   }
+  }
+  Future<void> deleteUser(String email,String password) async{
+    try{
+      String password1=await getPassword();
+      String? email1=await getemail();
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+      final user = FirebaseAuth.instance.currentUser;
+      debugPrint("${user?.email}");
+      await user?.delete();
+      await auth.signOut();
+      await auth.signInWithEmailAndPassword(email: email1, password: password1);
+      final user2 = FirebaseAuth.instance.currentUser;
+      debugPrint("sss${user2?.email}");
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+      if (snapshot.docs.isNotEmpty) {
+        final DocumentSnapshot userDoc = snapshot.docs.first;
+        final String userId = userDoc.id;
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .delete();
+
+        print('User deleted successfully');
+      }
+
+
+    }
+    catch(e){
+
+    }
   }
 }

@@ -39,6 +39,7 @@ class _SignupScreenState extends State<SignupScreen> {
           _loading=true;
         });
         Userr user=new Userr(
+          uid: "",
             name:usernameController.text,
             email: emailController.text,
             password:passwordController.text,

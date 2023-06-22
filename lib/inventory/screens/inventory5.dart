@@ -1278,21 +1278,23 @@ class _Inventory5State extends State<Inventory5> {
             type == "Borrowed"
                 ? Row(
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          text: 'Borrowed By:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              color: Colors.black),
-                          children: <TextSpan>[
-                            TextSpan(text: " "),
-                            TextSpan(
-                                text: borrowedBy,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColorss.darkFontGrey)),
-                          ],
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'Borrowed By:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 24,
+                                color: Colors.black),
+                            children: <TextSpan>[
+                              TextSpan(text: " "),
+                              TextSpan(
+                                  text: borrowedBy,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColorss.darkFontGrey)),
+                            ],
+                          ),
                         ),
                       )
                     ],
@@ -1522,7 +1524,7 @@ class _Inventory5State extends State<Inventory5> {
           child: Column(
             children: [
               const Text(
-                "Item is available for for borrowing from:",
+                "Item is available  for borrowing from:",
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 13),

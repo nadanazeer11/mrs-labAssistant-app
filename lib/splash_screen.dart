@@ -18,33 +18,62 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  HomeContr homeC=new HomeContr();
+  HomeContr homeC = new HomeContr();
 
-  changeScreen(){
+  changeScreen() {
     // Future.delayed(Duration(seconds: 1),(){
-      Navigator.popAndPushNamed(context, '/userState');
+    Navigator.popAndPushNamed(context, '/userState');
     // });
   }
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _loadData();
+   _loadData();
   }
-  void _loadData()async{
-     await homeC.updateIsLate();
-     changeScreen();
+
+  void _loadData() async {
+    await homeC.updateIsLate();
+    changeScreen();
   }
+
   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: AppColorss.darkmainColor,
+//       body: Center(
+//         child: Column(
+//           children: [
+//             Center(child: applogoWidget()),
+//             11.heightBox,
+//             Center(child: Text("Lab Assistant",style: TextStyle(fontSize: 26,color: Colors.white,fontWeight: FontWeight.bold),))
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorss.darkmainColor,
       body: Center(
-        child: Column(
-          children: [
-            Center(child: applogoWidget()),
-            11.heightBox,
-            Center(child: Text("Lab Assistant",style: TextStyle(fontSize: 26,color: Colors.white,fontWeight: FontWeight.bold),))
-          ],
+        child: Container(
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              applogoWidget(),
+              SizedBox(height: 11),
+              Text(
+                "Lab Assistant",
+                style: TextStyle(
+                  fontSize: 26,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

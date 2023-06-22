@@ -38,7 +38,7 @@ class _fileScreenState extends State<fileScreen> {
             appBar:AppBar(
               backgroundColor:AppColorss.lightmainColor ,
               elevation: 0,
-              title:Text("MRssS",style:subHeadingStyle) ,
+              title:Text("MRS",style:subHeadingStyle) ,
               actions: [
                 IconButton(onPressed: (){}, icon:Icon(Icons.filter_list_outlined))
               ],
